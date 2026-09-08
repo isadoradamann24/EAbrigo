@@ -177,7 +177,6 @@ class FamiliaDetalhesScreen extends StatelessWidget {
                                   color: Colors.white,
                                   border:
                                       Border.all(
-                                    color: Colors.black,
                                     width: 1,
                                   ),
                                   borderRadius:

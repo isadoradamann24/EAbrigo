@@ -1,382 +1,212 @@
-import 'package:sqflite/sqflite.dart';
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 
 import '../database/database_helper.dart';
 import '../models/cidade.dart';
 import '../models/familia.dart';
 import '../models/membro_familia.dart';
-import '../models/lotacao.dart';
+import '../models/usuario.dart';
 
 class BancoService {
-  // ============================================================
-  // BANCO
-  // ============================================================
-
-  Future<Database> get _db async {
-    return await DatabaseHelper.instance.database;
-  }
+  final DatabaseHelper _helper = DatabaseHelper.instance;
 
   // ============================================================
   // CIDADES
   // ============================================================
 
-  // Cadastrar cidade
-  Future<int> cadastrarCidade(Cidade cidade) async {
-    final db = await _db;
-
-    return await db.insert(
-      'cidades',
-      cidade.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-  }
-
-  // Buscar todas as cidades
   Future<List<Cidade>> listarCidades() async {
-    final db = await _db;
+    final db = await _helper.database;
 
-    final resultado = await db.query(
-      'cidades',
-      orderBy: 'nome ASC',
-    );
+    final resultado = await db.query('cidades');
 
-    return resultado
-        .map((map) => Cidade.fromMap(map))
-        .toList();
-  }
-
-  // Buscar cidade pelo ID
-  Future<Cidade?> buscarCidade(int id) async {
-    final db = await _db;
-
-    final resultado = await db.query(
-      'cidades',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-
-    if (resultado.isEmpty) {
-      return null;
-    }
-
-    return Cidade.fromMap(resultado.first);
-  }
-
-  // Editar cidade
-  Future<int> atualizarCidade(Cidade cidade) async {
-    final db = await _db;
-
-    return await db.update(
-      'cidades',
-      cidade.toMap(),
-      where: 'id = ?',
-      whereArgs: [cidade.id],
-    );
-  }
-
-  // Excluir cidade
-  Future<int> excluirCidade(int id) async {
-    final db = await _db;
-
-    return await db.delete(
-      'cidades',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return resultado.map((mapa) => Cidade.fromMap(mapa)).toList();
   }
 
   // ============================================================
-  // FAMÍLIAS
+  // FAMÍLIA
   // ============================================================
 
-  // Cadastrar família
+  /// Cadastra a família e retorna o id gerado.
   Future<int> cadastrarFamilia(Familia familia) async {
-    final db = await _db;
+    final db = await _helper.database;
 
-    final dados = familia.toMap();
+    final mapa = familia.toMap()..remove('id');
 
-    // O ID é criado automaticamente pelo SQLite.
-    dados.remove('id');
-
-    return await db.insert(
-      'familias',
-      dados,
-    );
+    return await db.insert('familias', mapa);
   }
 
-  // Listar todas as famílias
+  /// Cadastra a família junto com todos os membros da composição
+  /// familiar em uma única transação (tudo ou nada).
+  Future<int> cadastrarFamiliaCompleta(
+    Familia familia,
+    List<MembroFamilia> membros,
+  ) async {
+    final db = await _helper.database;
+
+    return await db.transaction<int>((txn) async {
+      final mapaFamilia = familia.toMap()..remove('id');
+
+      final familiaId = await txn.insert('familias', mapaFamilia);
+
+      for (final membro in membros) {
+        final mapaMembro = membro.copyWith(familiaId: familiaId).toMap()
+          ..remove('id');
+
+        await txn.insert('membros_familia', mapaMembro);
+      }
+
+      return familiaId;
+    });
+  }
+
+  /// Atualiza os dados da família e substitui a composição familiar
+  /// (membros) pela lista informada. Usado quando o responsável
+  /// reabre um cadastro já existente para continuar/editar.
+  Future<void> atualizarFamiliaCompleta(
+    Familia familia,
+    List<MembroFamilia> membros,
+  ) async {
+    final db = await _helper.database;
+
+    if (familia.id == null) {
+      throw ArgumentError(
+        'Não é possível atualizar uma família sem id.',
+      );
+    }
+
+    await db.transaction((txn) async {
+      final mapaFamilia = familia.toMap()..remove('id');
+
+      await txn.update(
+        'familias',
+        mapaFamilia,
+        where: 'id = ?',
+        whereArgs: [familia.id],
+      );
+
+      // Remove os membros antigos e grava a lista atual novamente,
+      // já que o usuário pode ter adicionado/removido pessoas.
+      await txn.delete(
+        'membros_familia',
+        where: 'familia_id = ?',
+        whereArgs: [familia.id],
+      );
+
+      for (final membro in membros) {
+        final mapaMembro = membro.copyWith(familiaId: familia.id).toMap()
+          ..remove('id');
+
+        await txn.insert('membros_familia', mapaMembro);
+      }
+    });
+  }
+
+  /// Lista todas as famílias cadastradas. A tela de bairro filtra
+  /// o resultado por cidade e bairro depois de receber a lista.
   Future<List<Familia>> listarFamilias() async {
-    final db = await _db;
+    final db = await _helper.database;
 
-    final resultado = await db.query(
-      'familias',
-      orderBy: 'id DESC',
-    );
+    final resultado = await db.query('familias');
 
-    return resultado
-        .map((map) => Familia.fromMap(map))
-        .toList();
+    return resultado.map((mapa) => Familia.fromMap(mapa)).toList();
   }
 
-  // Listar famílias de uma cidade
-  Future<List<Familia>> listarFamiliasPorCidade(
-    int cidadeId,
-  ) async {
-    final db = await _db;
+  /// Variante já filtrada por cidade, para quem preferir filtrar
+  /// direto na consulta em vez de em memória.
+  Future<List<Familia>> listarFamiliasPorCidade(int cidadeId) async {
+    final db = await _helper.database;
 
     final resultado = await db.query(
       'familias',
       where: 'cidade_id = ?',
       whereArgs: [cidadeId],
-      orderBy: 'responsavel ASC',
     );
 
-    return resultado
-        .map((map) => Familia.fromMap(map))
-        .toList();
-  }
-
-  // Buscar uma família pelo ID
-  Future<Familia?> buscarFamilia(int id) async {
-    final db = await _db;
-
-    final resultado = await db.query(
-      'familias',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-
-    if (resultado.isEmpty) {
-      return null;
-    }
-
-    return Familia.fromMap(resultado.first);
-  }
-
-  // Pesquisar família pelo responsável
-  Future<List<Familia>> pesquisarFamilias(
-    String texto,
-  ) async {
-    final db = await _db;
-
-    final resultado = await db.query(
-      'familias',
-      where: 'responsavel LIKE ?',
-      whereArgs: ['%$texto%'],
-      orderBy: 'responsavel ASC',
-    );
-
-    return resultado
-        .map((map) => Familia.fromMap(map))
-        .toList();
-  }
-
-  // Editar família
-  Future<int> atualizarFamilia(Familia familia) async {
-    final db = await _db;
-
-    final dados = familia.toMap();
-
-    dados.remove('id');
-
-    return await db.update(
-      'familias',
-      dados,
-      where: 'id = ?',
-      whereArgs: [familia.id],
-    );
-  }
-
-  // Excluir família
-  Future<int> excluirFamilia(int id) async {
-    final db = await _db;
-
-    return await db.delete(
-      'familias',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return resultado.map((mapa) => Familia.fromMap(mapa)).toList();
   }
 
   // ============================================================
-  // MEMBROS DA FAMÍLIA
+  // MEMBROS DA FAMÍLIA (Composição Familiar)
   // ============================================================
 
-  // Cadastrar membro
-  Future<int> cadastrarMembro(
-    MembroFamilia membro,
-  ) async {
-    final db = await _db;
+  Future<int> cadastrarMembro(MembroFamilia membro) async {
+    final db = await _helper.database;
 
-    final dados = membro.toMap();
+    final mapa = membro.toMap()..remove('id');
 
-    dados.remove('id');
-
-    return await db.insert(
-      'membros_familia',
-      dados,
-    );
+    return await db.insert('membros_familia', mapa);
   }
 
-  // Listar membros de uma família
-  Future<List<MembroFamilia>> listarMembros(
-    int familiaId,
-  ) async {
-    final db = await _db;
+  Future<List<MembroFamilia>> listarMembros(int familiaId) async {
+    final db = await _helper.database;
 
     final resultado = await db.query(
       'membros_familia',
       where: 'familia_id = ?',
       whereArgs: [familiaId],
-      orderBy: 'nome ASC',
     );
 
-    return resultado
-        .map((map) => MembroFamilia.fromMap(map))
-        .toList();
+    return resultado.map((mapa) => MembroFamilia.fromMap(mapa)).toList();
   }
 
-  // Buscar membro pelo ID
-  Future<MembroFamilia?> buscarMembro(int id) async {
-    final db = await _db;
+  Future<void> excluirMembro(int id) async {
+    final db = await _helper.database;
 
-    final resultado = await db.query(
+    await db.delete(
       'membros_familia',
       where: 'id = ?',
       whereArgs: [id],
-      limit: 1,
-    );
-
-    if (resultado.isEmpty) {
-      return null;
-    }
-
-    return MembroFamilia.fromMap(resultado.first);
-  }
-
-  // Editar membro
-  Future<int> atualizarMembro(
-    MembroFamilia membro,
-  ) async {
-    final db = await _db;
-
-    final dados = membro.toMap();
-
-    dados.remove('id');
-
-    return await db.update(
-      'membros_familia',
-      dados,
-      where: 'id = ?',
-      whereArgs: [membro.id],
-    );
-  }
-
-  // Excluir membro
-  Future<int> excluirMembro(int id) async {
-    final db = await _db;
-
-    return await db.delete(
-      'membros_familia',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  // Excluir todos os membros de uma família
-  Future<int> excluirMembrosDaFamilia(
-    int familiaId,
-  ) async {
-    final db = await _db;
-
-    return await db.delete(
-      'membros_familia',
-      where: 'familia_id = ?',
-      whereArgs: [familiaId],
     );
   }
 
   // ============================================================
-  // LOTAÇÃO
+  // USUÁRIOS (LOGIN / CADASTRO DE ADMINISTRADOR)
   // ============================================================
 
-  // Cadastrar lotação
-  Future<int> cadastrarLotacao(
-    Lotacao lotacao,
-  ) async {
-    final db = await _db;
-
-    final dados = lotacao.toMap();
-
-    dados.remove('id');
-
-    return await db.insert(
-      'lotacao',
-      dados,
-    );
+  String _hashSenha(String senha) {
+    return sha256.convert(utf8.encode(senha)).toString();
   }
 
-  // Buscar todas as lotações
-  Future<List<Lotacao>> listarLotacoes() async {
-    final db = await _db;
+  /// Cadastra um novo usuário. Lança uma exceção se o nome de
+  /// usuário já existir (coluna UNIQUE no banco).
+  Future<int> cadastrarUsuario({
+    required String usuario,
+    required String senha,
+    String email = '',
+    String cpf = '',
+    String telefone = '',
+  }) async {
+    final db = await _helper.database;
 
-    final resultado = await db.query(
-      'lotacao',
-      orderBy: 'cidade_id ASC',
+    final novoUsuario = Usuario(
+      usuario: usuario.trim(),
+      email: email.trim(),
+      cpf: cpf.trim(),
+      telefone: telefone.trim(),
+      senhaHash: _hashSenha(senha),
     );
 
-    return resultado
-        .map((map) => Lotacao.fromMap(map))
-        .toList();
+    return await db.insert('usuarios', novoUsuario.toMap()..remove('id'));
   }
 
-  // Buscar lotação de uma cidade
-  Future<Lotacao?> buscarLotacaoPorCidade(
-    int cidadeId,
-  ) async {
-    final db = await _db;
+  /// Retorna o usuário se a combinação usuário/senha estiver correta,
+  /// ou null se não encontrar (usuário inexistente ou senha errada).
+  Future<Usuario?> login({
+    required String usuario,
+    required String senha,
+  }) async {
+    final db = await _helper.database;
 
     final resultado = await db.query(
-      'lotacao',
-      where: 'cidade_id = ?',
-      whereArgs: [cidadeId],
+      'usuarios',
+      where: 'usuario = ? AND senha_hash = ?',
+      whereArgs: [usuario.trim(), _hashSenha(senha)],
       limit: 1,
     );
 
-    if (resultado.isEmpty) {
-      return null;
-    }
+    if (resultado.isEmpty) return null;
 
-    return Lotacao.fromMap(resultado.first);
-  }
-
-  // Editar lotação
-  Future<int> atualizarLotacao(
-    Lotacao lotacao,
-  ) async {
-    final db = await _db;
-
-    final dados = lotacao.toMap();
-
-    dados.remove('id');
-
-    return await db.update(
-      'lotacao',
-      dados,
-      where: 'id = ?',
-      whereArgs: [lotacao.id],
-    );
-  }
-
-  // Excluir lotação
-  Future<int> excluirLotacao(int id) async {
-    final db = await _db;
-
-    return await db.delete(
-      'lotacao',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return Usuario.fromMap(resultado.first);
   }
 }

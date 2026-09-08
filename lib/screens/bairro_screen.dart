@@ -5,6 +5,7 @@ import 'cadastro_screen.dart';
 import '../models/cidade.dart';
 import '../models/familia.dart';
 import '../services/banco_service.dart';
+import '../widgets/cabecalho.dart';
 
 class BairroScreen extends StatefulWidget {
   final Cidade cidade;
@@ -99,9 +100,9 @@ class _BairroScreenState extends State<BairroScreen> {
       setState(() {
         familias = familiasDoBairro;
 
-        // Não mostra nenhuma família automaticamente.
-        // Elas só aparecem depois da pesquisa.
-        familiasFiltradas = [];
+        // Lista sempre visível: mostra todas as famílias do
+        // bairro por padrão; a pesquisa apenas filtra essa lista.
+        familiasFiltradas = familiasDoBairro;
 
         carregando = false;
       });
@@ -133,10 +134,10 @@ class _BairroScreenState extends State<BairroScreen> {
         pesquisaController.text.trim().toLowerCase();
 
     setState(() {
-      // Se o campo estiver vazio,
-      // não mostra nenhuma família.
+      // Campo vazio: mostra a listagem completa de famílias
+      // cadastradas no bairro.
       if (texto.isEmpty) {
-        familiasFiltradas = [];
+        familiasFiltradas = familias;
         return;
       }
 
@@ -150,7 +151,7 @@ class _BairroScreenState extends State<BairroScreen> {
   }
 
   // ==========================================================
-  // ABRIR CADASTRO
+  // ABRIR CADASTRO (FAMÍLIA NOVA)
   // ==========================================================
 
   void abrirCadastroFamilia() {
@@ -170,6 +171,28 @@ class _BairroScreenState extends State<BairroScreen> {
   }
 
   // ==========================================================
+  // ABRIR FORMULÁRIO DE UMA FAMÍLIA JÁ CADASTRADA
+  // (toca no nome encontrado na pesquisa)
+  // ==========================================================
+
+  void abrirFormularioDaFamilia(Familia familia) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CadastroScreen(
+          cidade: widget.cidade,
+          bairro: widget.bairro,
+          familiaExistente: familia,
+        ),
+      ),
+    ).then((_) {
+      // Quando voltar, atualiza a lista e limpa a pesquisa.
+      pesquisaController.clear();
+      carregarFamilias();
+    });
+  }
+
+  // ==========================================================
   // CARD DA FAMÍLIA
   // ==========================================================
 
@@ -178,22 +201,26 @@ class _BairroScreenState extends State<BairroScreen> {
       padding: const EdgeInsets.only(
         bottom: 8,
       ),
-      child: Container(
-        width: double.infinity,
-        height: 31,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          familia.responsavel,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.black87,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => abrirFormularioDaFamilia(familia),
+        child: Container(
+          width: double.infinity,
+          height: 31,
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 14,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            familia.responsavel,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+            ),
           ),
         ),
       ),
@@ -254,50 +281,7 @@ class _BairroScreenState extends State<BairroScreen> {
             // CABEÇALHO
             // ==================================================
 
-            Container(
-              height: 53,
-              width: double.infinity,
-              color: Colors.white,
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 7,
-                    ),
-                    child: Image.asset(
-                      'imgs/logo.png',
-                      width: 57,
-                      height: 50,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.menu,
-                      color: Colors.black,
-                      size: 23,
-                    ),
-                  ),
-
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.person_outline,
-                      color: Colors.black,
-                      size: 21,
-                    ),
-                  ),
-
-                  const SizedBox(
-                    width: 2,
-                  ),
-                ],
-              ),
-            ),
+            const Cabecalho(),
 
             // ==================================================
             // ÁREA PRINCIPAL
@@ -538,13 +522,12 @@ class _BairroScreenState extends State<BairroScreen> {
                                 ),
 
                               // ==========================================
-                              // RESULTADOS DA PESQUISA
+                              // LISTAGEM DE FAMÍLIAS CADASTRADAS
+                              // (sempre visível; a pesquisa apenas
+                              // filtra o que aparece aqui)
                               // ==========================================
 
-                              if (!carregando &&
-                                  pesquisaController
-                                      .text
-                                      .isNotEmpty)
+                              if (!carregando)
                                 ...familiasFiltradas.map(
                                   (familia) {
                                     return _cardFamilia(
@@ -558,19 +541,16 @@ class _BairroScreenState extends State<BairroScreen> {
                               // ==========================================
 
                               if (!carregando &&
-                                  pesquisaController
-                                      .text
-                                      .isNotEmpty &&
-                                  familiasFiltradas
-                                      .isEmpty)
-                                const Padding(
-                                  padding:
-                                      EdgeInsets.only(
-                                    top: 10,
-                                  ),
+                                  familiasFiltradas.isEmpty)
+                                Padding(
+                                  padding: const EdgeInsets
+                                      .only(top: 10),
                                   child: Text(
-                                    'Nenhuma família encontrada.',
-                                    style: TextStyle(
+                                    pesquisaController
+                                            .text.isEmpty
+                                        ? 'Nenhuma família cadastrada neste bairro.'
+                                        : 'Nenhuma família encontrada.',
+                                    style: const TextStyle(
                                       fontSize: 12,
                                       color:
                                           Colors.black54,

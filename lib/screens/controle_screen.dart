@@ -27,7 +27,7 @@ class _ControleScreenState extends State<ControleScreen> {
       case 'rio do sul':
         return [
           'Progresso',
-          'Bos Vista',
+          'Boa Vista',
           'Santa Rita',
           'Canta Galo',
         ];
