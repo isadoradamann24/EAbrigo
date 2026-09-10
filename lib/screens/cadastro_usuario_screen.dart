@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/banco_service.dart';
+import '../widgets/cabecalho.dart';
 import 'login_screen.dart';
 
 class CadastroUsuarioScreen extends StatefulWidget {
@@ -129,115 +130,115 @@ class _CadastroUsuarioScreenState extends State<CadastroUsuarioScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              height: 53,
-              width: double.infinity,
-              color: Colors.white,
-              child: Row(
+            const Cabecalho(),
+            Expanded(
+              child: Stack(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 7),
-                    child: Image.asset(
-                      'imgs/logo.png',
-                      width: 57,
-                      height: 50,
-                      fit: BoxFit.contain,
+                  Center(
+                    child: Opacity(
+                      opacity: 0.12,
+                      child: Image.asset(
+                        'imgs/logofosca.png',
+                        width: 250,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(30),
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.55),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              'Cadastro',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFFF6F5A),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            _campo(
+                                label: 'Usuário:',
+                                controller: usuarioController),
+                            const SizedBox(height: 12),
+                            _campo(
+                              label: 'Email:',
+                              controller: emailController,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            const SizedBox(height: 12),
+                            _campo(
+                              label: 'CPF:',
+                              controller: cpfController,
+                              keyboardType: TextInputType.number,
+                            ),
+                            const SizedBox(height: 12),
+                            _campo(
+                              label: 'Telefone:',
+                              controller: telefoneController,
+                              keyboardType: TextInputType.phone,
+                            ),
+                            const SizedBox(height: 12),
+                            _campo(
+                              label: 'Senha:',
+                              controller: senhaController,
+                              senha: true,
+                            ),
+                            const SizedBox(height: 12),
+                            _campo(
+                              label: 'Confirmar Senha:',
+                              controller: confirmarSenhaController,
+                              senha: true,
+                            ),
+                            const SizedBox(height: 10),
+                            TextButton(
+                              onPressed: abrirLogin,
+                              child: const Text(
+                                'Fazer Login',
+                                style: TextStyle(
+                                    color: Colors.black54, fontSize: 12),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            SizedBox(
+                              height: 44,
+                              child: ElevatedButton(
+                                onPressed: salvando ? null : cadastrar,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFF6F5A),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                ),
+                                child: salvando
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Text('Entrar'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(30),
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4FF),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Cadastro',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFFF6F5A),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        _campo(label: 'Usuário:', controller: usuarioController),
-                        const SizedBox(height: 12),
-                        _campo(
-                          label: 'Email:',
-                          controller: emailController,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 12),
-                        _campo(
-                          label: 'CPF:',
-                          controller: cpfController,
-                          keyboardType: TextInputType.number,
-                        ),
-                        const SizedBox(height: 12),
-                        _campo(
-                          label: 'Telefone:',
-                          controller: telefoneController,
-                          keyboardType: TextInputType.phone,
-                        ),
-                        const SizedBox(height: 12),
-                        _campo(
-                          label: 'Senha:',
-                          controller: senhaController,
-                          senha: true,
-                        ),
-                        const SizedBox(height: 12),
-                        _campo(
-                          label: 'Confirmar Senha:',
-                          controller: confirmarSenhaController,
-                          senha: true,
-                        ),
-                        const SizedBox(height: 10),
-                        TextButton(
-                          onPressed: abrirLogin,
-                          child: const Text(
-                            'Fazer Login',
-                            style: TextStyle(color: Colors.black54, fontSize: 12),
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        SizedBox(
-                          height: 44,
-                          child: ElevatedButton(
-                            onPressed: salvando ? null : cadastrar,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF6F5A),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                            ),
-                            child: salvando
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : const Text('Entrar'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ),
             ),
           ],

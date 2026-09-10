@@ -26,13 +26,10 @@ class DatabaseHelper {
     return await openDatabase(
       path,
 
-      // A versão foi alterada de 3 para 4
-      version: 4,
+      // A versão foi alterada de 4 para 5
+      version: 5,
 
-      // Executado quando o banco é criado pela primeira vez
       onCreate: _createDB,
-
-      // Executado quando atualizamos a versão do banco
       onUpgrade: _onUpgrade,
     );
   }
@@ -45,20 +42,12 @@ class DatabaseHelper {
     Database db,
     int version,
   ) async {
-    // ==========================================================
-    // TABELA CIDADES
-    // ==========================================================
-
     await db.execute('''
       CREATE TABLE cidades (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL
       )
     ''');
-
-    // ==========================================================
-    // TABELA FAMÍLIAS (já com os campos do novo formulário)
-    // ==========================================================
 
     await db.execute('''
       CREATE TABLE familias (
@@ -99,10 +88,6 @@ class DatabaseHelper {
       )
     ''');
 
-    // ==========================================================
-    // TABELA MEMBROS DA FAMÍLIA (Composição Familiar)
-    // ==========================================================
-
     await db.execute('''
       CREATE TABLE membros_familia (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,22 +105,22 @@ class DatabaseHelper {
 
     // ==========================================================
     // TABELA LOTAÇÃO
+    // Agora com a coluna "bairro", pois a capacidade é definida
+    // por abrigo (bairro dentro de uma cidade), não pela cidade
+    // inteira.
     // ==========================================================
 
     await db.execute('''
       CREATE TABLE lotacao (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         cidade_id INTEGER NOT NULL,
+        bairro TEXT NOT NULL,
         capacidade INTEGER NOT NULL,
         ocupacao INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (cidade_id)
           REFERENCES cidades (id)
       )
     ''');
-
-    // ==========================================================
-    // TABELA USUÁRIOS (login / cadastro de administrador)
-    // ==========================================================
 
     await db.execute('''
       CREATE TABLE usuarios (
@@ -147,10 +132,6 @@ class DatabaseHelper {
         senha_hash TEXT NOT NULL
       )
     ''');
-
-    // ==========================================================
-    // CIDADES INICIAIS
-    // ==========================================================
 
     const cidadesIniciais = [
       'Agronômica',
@@ -182,23 +163,12 @@ class DatabaseHelper {
     int oldVersion,
     int newVersion,
   ) async {
-    // ==========================================================
-    // VERSÃO 2
-    // Adiciona novas cidades sem apagar os dados existentes
-    // ==========================================================
-
     if (oldVersion < 2) {
       await db.insert('cidades', {'nome': 'Ibirama'});
       await db.insert('cidades', {'nome': 'Apiúna'});
       await db.insert('cidades', {'nome': 'Pouso Redondo'});
       await db.insert('cidades', {'nome': 'Presidente Nereu'});
     }
-
-    // ==========================================================
-    // VERSÃO 3
-    // Adiciona as colunas do novo formulário de cadastro,
-    // sem apagar nenhum dado existente (ALTER TABLE ADD COLUMN)
-    // ==========================================================
 
     if (oldVersion < 3) {
       final novasColunasFamilias = <String>[
@@ -244,11 +214,6 @@ class DatabaseHelper {
       );
     }
 
-    // ==========================================================
-    // VERSÃO 4
-    // Cria a tabela de usuários (login / cadastro de administrador)
-    // ==========================================================
-
     if (oldVersion < 4) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS usuarios (
@@ -261,6 +226,234 @@ class DatabaseHelper {
         )
       ''');
     }
+
+    // ==========================================================
+    // VERSÃO 5
+    // Adiciona a coluna "bairro" na tabela lotacao, pois a
+    // capacidade passa a ser definida por abrigo (bairro), e
+    // não mais por cidade inteira.
+    // ==========================================================
+
+    if (oldVersion < 5) {
+      await db.execute(
+        "ALTER TABLE lotacao ADD COLUMN bairro TEXT NOT NULL DEFAULT ''",
+      );
+    }
+  }
+
+  // ============================================================
+  // IDADE A PARTIR DA DATA DE NASCIMENTO (formato dd/mm/aaaa)
+  // ============================================================
+
+  int? calcularIdade(String? dataNascimento) {
+    if (dataNascimento == null || dataNascimento.trim().isEmpty) {
+      return null;
+    }
+
+    try {
+      final partes = dataNascimento.split('/');
+
+      if (partes.length != 3) {
+        return null;
+      }
+
+      final dia = int.parse(partes[0]);
+      final mes = int.parse(partes[1]);
+      final ano = int.parse(partes[2]);
+
+      final nascimento = DateTime(ano, mes, dia);
+      final hoje = DateTime.now();
+
+      int idade = hoje.year - nascimento.year;
+
+      final aniversarioJaPassouEsteAno =
+          (hoje.month > nascimento.month) ||
+              (hoje.month == nascimento.month &&
+                  hoje.day >= nascimento.day);
+
+      if (!aniversarioJaPassouEsteAno) {
+        idade--;
+      }
+
+      return idade < 0 ? null : idade;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ============================================================
+  // FAIXA ETÁRIA A PARTIR DA IDADE
+  // ============================================================
+
+  static const List<String> ordemFaixasEtarias = [
+    'Até 2 anos',
+    '3 a 9 anos',
+    '10 a 12 anos',
+    '13 a 17 anos',
+    '18 a 59 anos',
+    '60 anos ou mais',
+  ];
+
+  String faixaEtariaDe(int idade) {
+    if (idade <= 2) return 'Até 2 anos';
+    if (idade <= 9) return '3 a 9 anos';
+    if (idade <= 12) return '10 a 12 anos';
+    if (idade <= 17) return '13 a 17 anos';
+    if (idade <= 59) return '18 a 59 anos';
+    return '60 anos ou mais';
+  }
+
+  // ============================================================
+  // TODAS AS IDADES CADASTRADAS EM UM BAIRRO (ABRIGO)
+  // Responsável (calculado por data_nascimento) + cada membro
+  // da família (coluna idade em membros_familia).
+  // ============================================================
+
+  Future<List<int>> buscarIdadesPorBairro({
+    required int cidadeId,
+    required String bairro,
+  }) async {
+    final db = await database;
+
+    final familias = await db.query(
+      'familias',
+      where: 'cidade_id = ? AND bairro = ?',
+      whereArgs: [cidadeId, bairro],
+    );
+
+    final List<int> idades = [];
+
+    for (final familia in familias) {
+      final idadeResponsavel = calcularIdade(
+        familia['data_nascimento'] as String?,
+      );
+
+      if (idadeResponsavel != null) {
+        idades.add(idadeResponsavel);
+      }
+
+      final membros = await db.query(
+        'membros_familia',
+        where: 'familia_id = ?',
+        whereArgs: [familia['id']],
+      );
+
+      for (final membro in membros) {
+        final idade = membro['idade'];
+
+        if (idade != null && idade is int) {
+          idades.add(idade);
+        }
+      }
+    }
+
+    return idades;
+  }
+
+  // ============================================================
+  // CAPACIDADE DE UM ABRIGO (cidade + bairro)
+  // ============================================================
+
+  Future<int?> buscarCapacidadeAbrigo({
+    required int cidadeId,
+    required String bairro,
+  }) async {
+    final db = await database;
+
+    final resultado = await db.query(
+      'lotacao',
+      where: 'cidade_id = ? AND bairro = ?',
+      whereArgs: [cidadeId, bairro],
+    );
+
+    if (resultado.isEmpty) {
+      return null;
+    }
+
+    return resultado.first['capacidade'] as int;
+  }
+
+  Future<void> salvarCapacidadeAbrigo({
+    required int cidadeId,
+    required String bairro,
+    required int capacidade,
+  }) async {
+    final db = await database;
+
+    final existente = await db.query(
+      'lotacao',
+      where: 'cidade_id = ? AND bairro = ?',
+      whereArgs: [cidadeId, bairro],
+    );
+
+    if (existente.isEmpty) {
+      await db.insert('lotacao', {
+        'cidade_id': cidadeId,
+        'bairro': bairro,
+        'capacidade': capacidade,
+        'ocupacao': 0,
+      });
+    } else {
+      await db.update(
+        'lotacao',
+        {'capacidade': capacidade},
+        where: 'cidade_id = ? AND bairro = ?',
+        whereArgs: [cidadeId, bairro],
+      );
+    }
+  }
+
+  // ============================================================
+  // LISTA DE ABRIGOS (BAIRROS) CADASTRADOS PARA UMA CIDADE
+  // ============================================================
+
+  Future<List<String>> buscarBairrosComLotacao(int cidadeId) async {
+    final db = await database;
+
+    final resultado = await db.rawQuery(
+      'SELECT DISTINCT bairro FROM lotacao WHERE cidade_id = ? ORDER BY bairro',
+      [cidadeId],
+    );
+
+    return resultado
+        .map((linha) => linha['bairro'] as String)
+        .where((bairro) => bairro.isNotEmpty)
+        .toList();
+  }
+
+  // ============================================================
+  // LOTAÇÃO COMPLETA DE UM ABRIGO (para a tela LotacaoScreen)
+  // ============================================================
+
+  Future<LotacaoInfo> buscarLotacao({
+    required int cidadeId,
+    required String bairro,
+  }) async {
+    final idades = await buscarIdadesPorBairro(
+      cidadeId: cidadeId,
+      bairro: bairro,
+    );
+
+    final contagem = {
+      for (final faixa in ordemFaixasEtarias) faixa: 0,
+    };
+
+    for (final idade in idades) {
+      final faixa = faixaEtariaDe(idade);
+      contagem[faixa] = (contagem[faixa] ?? 0) + 1;
+    }
+
+    final capacidade = await buscarCapacidadeAbrigo(
+          cidadeId: cidadeId,
+          bairro: bairro,
+        ) ??
+        0;
+
+    return LotacaoInfo(
+      capacidade: capacidade,
+      ocupacao: idades.length,
+      porFaixaEtaria: contagem,
+    );
   }
 
   // ============================================================
@@ -274,4 +467,22 @@ class DatabaseHelper {
 
     _database = null;
   }
+}
+
+// ================================================================
+// MODELO: dados prontos para a LotacaoScreen
+// ================================================================
+
+class LotacaoInfo {
+  final int capacidade;
+  final int ocupacao;
+  final Map<String, int> porFaixaEtaria;
+
+  LotacaoInfo({
+    required this.capacidade,
+    required this.ocupacao,
+    required this.porFaixaEtaria,
+  });
+
+  int get vagasDisponiveis => capacidade - ocupacao;
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/banco_service.dart';
+import '../widgets/cabecalho.dart';
 import 'cadastro_usuario_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -107,94 +108,94 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              height: 53,
-              width: double.infinity,
-              color: Colors.white,
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 7),
-                    child: Image.asset(
-                      'imgs/logo.png',
-                      width: 57,
-                      height: 50,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const Cabecalho(),
             Expanded(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4FF),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Text(
-                            'Login',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFF6F5A),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          _campo(label: 'Usuário:', controller: usuarioController),
-                          const SizedBox(height: 14),
-                          _campo(
-                            label: 'Senha:',
-                            controller: senhaController,
-                            senha: true,
-                          ),
-                          const SizedBox(height: 10),
-                          TextButton(
-                            onPressed: abrirCadastro,
-                            child: const Text(
-                              'Fazer Cadastro',
-                              style: TextStyle(color: Colors.black54, fontSize: 12),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          SizedBox(
-                            height: 44,
-                            child: ElevatedButton(
-                              onPressed: entrando ? null : entrar,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFFFF6F5A),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                              ),
-                              child: entrando
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : const Text('Entrar'),
-                            ),
-                          ),
-                        ],
+              child: Stack(
+                children: [
+                  Center(
+                    child: Opacity(
+                      opacity: 0.12,
+                      child: Image.asset(
+                        'imgs/logofosca.png',
+                        width: 250,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
-                ),
+                  Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.55),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'Login',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFFF6F5A),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              _campo(
+                                  label: 'Usuário:',
+                                  controller: usuarioController),
+                              const SizedBox(height: 14),
+                              _campo(
+                                label: 'Senha:',
+                                controller: senhaController,
+                                senha: true,
+                              ),
+                              const SizedBox(height: 10),
+                              TextButton(
+                                onPressed: abrirCadastro,
+                                child: const Text(
+                                  'Fazer Cadastro',
+                                  style: TextStyle(
+                                      color: Colors.black54, fontSize: 12),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              SizedBox(
+                                height: 44,
+                                child: ElevatedButton(
+                                  onPressed: entrando ? null : entrar,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF6F5A),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(24),
+                                    ),
+                                  ),
+                                  child: entrando
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Text('Entrar'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
