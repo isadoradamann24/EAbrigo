@@ -103,7 +103,8 @@ class _CadastroUsuarioScreenState extends State<CadastroUsuarioScreen> {
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            // CARD BRANCO TRANSPARENTE
+            color: Colors.white.withOpacity(0.85),
             borderRadius: BorderRadius.circular(20),
           ),
           child: TextFormField(
@@ -149,6 +150,7 @@ class _CadastroUsuarioScreenState extends State<CadastroUsuarioScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
+                        // CARD BRANCO TRANSPARENTE (painel principal)
                         color: Colors.white.withOpacity(0.55),
                         borderRadius: BorderRadius.circular(20),
                       ),

@@ -42,12 +42,20 @@ class DatabaseHelper {
     Database db,
     int version,
   ) async {
+    // ==========================================================
+    // TABELA CIDADES
+    // ==========================================================
+
     await db.execute('''
       CREATE TABLE cidades (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL
       )
     ''');
+
+    // ==========================================================
+    // TABELA FAMÍLIAS (já com os campos do novo formulário)
+    // ==========================================================
 
     await db.execute('''
       CREATE TABLE familias (
@@ -88,6 +96,10 @@ class DatabaseHelper {
       )
     ''');
 
+    // ==========================================================
+    // TABELA MEMBROS DA FAMÍLIA (Composição Familiar)
+    // ==========================================================
+
     await db.execute('''
       CREATE TABLE membros_familia (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -105,9 +117,8 @@ class DatabaseHelper {
 
     // ==========================================================
     // TABELA LOTAÇÃO
-    // Agora com a coluna "bairro", pois a capacidade é definida
-    // por abrigo (bairro dentro de uma cidade), não pela cidade
-    // inteira.
+    // Com a coluna "bairro": a capacidade é definida por abrigo
+    // (bairro dentro de uma cidade), não pela cidade inteira.
     // ==========================================================
 
     await db.execute('''
@@ -122,6 +133,10 @@ class DatabaseHelper {
       )
     ''');
 
+    // ==========================================================
+    // TABELA USUÁRIOS (login / cadastro de administrador)
+    // ==========================================================
+
     await db.execute('''
       CREATE TABLE usuarios (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -132,6 +147,10 @@ class DatabaseHelper {
         senha_hash TEXT NOT NULL
       )
     ''');
+
+    // ==========================================================
+    // CIDADES INICIAIS
+    // ==========================================================
 
     const cidadesIniciais = [
       'Agronômica',
@@ -163,12 +182,20 @@ class DatabaseHelper {
     int oldVersion,
     int newVersion,
   ) async {
+    // ==========================================================
+    // VERSÃO 2
+    // ==========================================================
+
     if (oldVersion < 2) {
       await db.insert('cidades', {'nome': 'Ibirama'});
       await db.insert('cidades', {'nome': 'Apiúna'});
       await db.insert('cidades', {'nome': 'Pouso Redondo'});
       await db.insert('cidades', {'nome': 'Presidente Nereu'});
     }
+
+    // ==========================================================
+    // VERSÃO 3
+    // ==========================================================
 
     if (oldVersion < 3) {
       final novasColunasFamilias = <String>[
@@ -213,6 +240,10 @@ class DatabaseHelper {
         'ALTER TABLE membros_familia ADD COLUMN identidade_genero TEXT',
       );
     }
+
+    // ==========================================================
+    // VERSÃO 4
+    // ==========================================================
 
     if (oldVersion < 4) {
       await db.execute('''

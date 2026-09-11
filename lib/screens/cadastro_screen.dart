@@ -9,10 +9,6 @@ import '../widgets/cabecalho.dart';
 class CadastroScreen extends StatefulWidget {
   final Cidade cidade;
   final String bairro;
-
-  /// Quando informada, a tela abre em modo de edição: os campos são
-  /// pré-preenchidos com os dados dessa família (e seus membros) e
-  /// o botão "Salvar" atualiza o registro em vez de criar um novo.
   final Familia? familiaExistente;
 
   const CadastroScreen({
@@ -31,19 +27,11 @@ class _CadastroScreenState extends State<CadastroScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
-  // ==========================================================
-  // CONTROLLERS - IDENTIFICAÇÃO PESSOAL
-  // ==========================================================
-
   final nomeController = TextEditingController();
   final enderecoController = TextEditingController();
   final nacionalidadeController = TextEditingController();
   final cpfController = TextEditingController();
   final telefoneController = TextEditingController();
-
-  // ==========================================================
-  // CONTROLLERS - CAMPOS "SE SIM, QUAL"
-  // ==========================================================
 
   final qualBeneficioOutroController = TextEditingController();
   final qualAposentadoOutroController = TextEditingController();
@@ -57,10 +45,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
   DateTime dataCadastro = DateTime.now();
 
   bool salvando = false;
-
-  // ==========================================================
-  // CAMPOS DE SELEÇÃO (radio / sim-não)
-  // ==========================================================
 
   String? etnia;
   String? identidadeGenero;
@@ -84,10 +68,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
 
   String? houvePerdaDocumentacao;
 
-  // ==========================================================
-  // COMPOSIÇÃO FAMILIAR
-  // ==========================================================
-
   final List<MembroFamilia> membros = [];
 
   bool carregandoDados = false;
@@ -103,10 +83,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
       _carregarMembrosExistentes(existente.id!);
     }
   }
-
-  // ==========================================================
-  // PRÉ-CARREGAR DADOS (MODO EDIÇÃO)
-  // ==========================================================
 
   DateTime? _parseData(String data) {
     if (data.trim().isEmpty) return null;
@@ -209,10 +185,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
     super.dispose();
   }
 
-  // ==========================================================
-  // SALVAR FAMÍLIA
-  // ==========================================================
-
   Future<void> salvarFamilia() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -307,10 +279,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
     }
   }
 
-  // ==========================================================
-  // LIMPAR
-  // ==========================================================
-
   void limparFormulario() {
     nomeController.clear();
     enderecoController.clear();
@@ -347,10 +315,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
     });
   }
 
-  // ==========================================================
-  // DATAS
-  // ==========================================================
-
   String _formatarData(DateTime data) {
     return '${data.day.toString().padLeft(2, '0')}/'
         '${data.month.toString().padLeft(2, '0')}/'
@@ -386,10 +350,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
       });
     }
   }
-
-  // ==========================================================
-  // COMPOSIÇÃO FAMILIAR - ADICIONAR / REMOVER MEMBRO
-  // ==========================================================
 
   Future<void> abrirDialogoMembro() async {
     final nomeMembroController = TextEditingController();
@@ -521,8 +481,23 @@ class _CadastroScreenState extends State<CadastroScreen> {
   }
 
   // ==========================================================
-  // WIDGETS REUTILIZÁVEIS
+  // CARD-BASE DE CADA PERGUNTA
+  // Branco semi-transparente, para diferenciar visualmente as
+  // perguntas e deixar a marca d'água aparecer atrás.
   // ==========================================================
+
+  Widget _cardPergunta(Widget child) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.65),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: child,
+    );
+  }
 
   Widget _campo({
     required String hint,
@@ -535,7 +510,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        // CARD BRANCO TRANSPARENTE
+        color: Colors.white.withOpacity(0.75),
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextFormField(
@@ -582,16 +558,14 @@ class _CadastroScreenState extends State<CadastroScreen> {
     );
   }
 
-  /// Grupo de opções em radio, organizadas em Wrap (quebra linha sozinho).
   Widget _grupoOpcoes({
     required String pergunta,
     required List<String> opcoes,
     required String? valor,
     required ValueChanged<String?> onChanged,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
+    return _cardPergunta(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _pergunta(pergunta),
@@ -621,15 +595,13 @@ class _CadastroScreenState extends State<CadastroScreen> {
     );
   }
 
-  /// Pergunta Sim/Não, retorna o widget de campo condicional se necessário.
   Widget _grupoSimNao({
     required String pergunta,
     required String? valor,
     required ValueChanged<String?> onChanged,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
-      child: Column(
+    return _cardPergunta(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _pergunta(pergunta),
@@ -659,9 +631,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
     required Set<String> selecionados,
     required VoidCallback onChanged,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
+    return _cardPergunta(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _pergunta(pergunta),
@@ -693,9 +664,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
     required DateTime? data,
     required VoidCallback onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
+    return _cardPergunta(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _pergunta(label),
@@ -706,7 +676,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
               height: 45,
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.white.withOpacity(0.85),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -770,7 +740,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // CARD BRANCO TRANSPARENTE
+        color: Colors.white.withOpacity(0.75),
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(1, 2)),
@@ -781,9 +752,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE2E8FF),
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: const Color(0xFFE2E8FF).withOpacity(0.85),
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
@@ -827,22 +798,14 @@ class _CadastroScreenState extends State<CadastroScreen> {
     );
   }
 
-  // ==========================================================
-  // BUILD
-  // ==========================================================
-
   @override
   Widget build(BuildContext context) {
-    // Lista de seções montadas apenas quando visíveis pelo
-    // ListView.builder — evita construir o formulário inteiro
-    // de uma vez, reduzindo o custo de memória da tela.
     final secoes = <Widget>[
-      // BAIRRO
       Container(
         width: double.infinity,
         height: 36,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.75),
           border: Border.all(color: Colors.black, width: 1),
           borderRadius: BorderRadius.circular(7),
           boxShadow: const [
@@ -980,7 +943,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
         valor: cadastroUnico,
         onChanged: (v) => setState(() => cadastroUnico = v),
       ),
-      const SizedBox(height: 10),
 
       _grupoSimNao(
         pergunta:
@@ -1129,7 +1091,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
           icon: const Icon(Icons.add, size: 18),
           label: const Text('Adicionar membro'),
           style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.white,
+            backgroundColor: Colors.white.withOpacity(0.75),
             foregroundColor: Colors.black87,
             side: const BorderSide(color: Colors.black),
             shape: RoundedRectangleBorder(
@@ -1168,10 +1130,8 @@ class _CadastroScreenState extends State<CadastroScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // CABEÇALHO
             const Cabecalho(),
 
-            // CONTEÚDO
             Expanded(
               child: Stack(
                 children: [
@@ -1204,9 +1164,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
                             right: paddingHorizontal,
                             bottom: 40,
                           ),
-                          // Constrói/recicla só as seções visíveis
-                          // na tela, em vez de montar o formulário
-                          // inteiro de uma só vez.
                           itemCount: secoes.length,
                           itemBuilder: (context, index) => secoes[index],
                         ),

@@ -153,6 +153,7 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
       color: Colors.white,
       child: Row(
         children: [
+          // LOGO
           Padding(
             padding: const EdgeInsets.only(left: 7),
             child: Image.asset(
@@ -162,19 +163,33 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
               fit: BoxFit.contain,
             ),
           ),
+
           const Spacer(),
+
+          // MENU
           IconButton(
             onPressed: () => _abrirMenu(context),
-            icon: const Icon(Icons.menu, color: Colors.black, size: 23),
+            icon: const Icon(
+              Icons.menu,
+              color: Colors.black,
+              size: 23,
+            ),
           ),
+
+          // PERFIL / LOGIN
           IconButton(
             onPressed: () => _abrirLogin(context),
-            icon: const Icon(Icons.person_outline,
-                color: Colors.black, size: 21),
+            icon: const Icon(
+              Icons.person_outline,
+              color: Colors.black,
+              size: 21,
+            ),
           ),
+
           const SizedBox(width: 2),
         ],
       ),
     );
   }
 }
+

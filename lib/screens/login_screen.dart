@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/banco_service.dart';
+import '../screens/sessao_usuario.dart';
 import '../widgets/cabecalho.dart';
 import 'cadastro_usuario_screen.dart';
 
@@ -50,7 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // Login OK: volta para a tela anterior informando sucesso.
+      SessaoUsuario.instance.definirUsuario(usuario);
+
       Navigator.pop(context, usuario);
     } catch (e) {
       if (!mounted) return;
@@ -82,7 +84,8 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            // CARD BRANCO TRANSPARENTE
+            color: Colors.white.withOpacity(0.85),
             borderRadius: BorderRadius.circular(20),
           ),
           child: TextFormField(
@@ -128,6 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
+                          // CARD BRANCO TRANSPARENTE (painel principal)
                           color: Colors.white.withOpacity(0.55),
                           borderRadius: BorderRadius.circular(20),
                         ),
