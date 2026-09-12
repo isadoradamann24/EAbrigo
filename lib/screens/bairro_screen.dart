@@ -133,12 +133,12 @@ class _BairroScreenState extends State<BairroScreen> {
         onTap: () => abrirFormularioDaFamilia(familia),
         child: Container(
           width: double.infinity,
-          height: 31,
+          height: 36,
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
             // CARD BRANCO TRANSPARENTE
-            color: Colors.white.withOpacity(0.75),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -223,8 +223,8 @@ class _BairroScreenState extends State<BairroScreen> {
                                 width: double.infinity,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  // CARD BRANCO TRANSPARENTE
-                                  color: Colors.white.withOpacity(0.75),
+                                  // CARD BRANCO 
+                                  color: Colors.white,
                                   border: Border.all(color: Colors.black, width: 1),
                                   borderRadius: BorderRadius.circular(7),
                                   boxShadow: const [
@@ -272,19 +272,18 @@ class _BairroScreenState extends State<BairroScreen> {
                               // PESQUISA
                               Container(
                                 width: double.infinity,
-                                height: 31,
+                                height: 35,
                                 decoration: BoxDecoration(
-                                  // CARD BRANCO TRANSPARENTE
-                                  color: Colors.white.withOpacity(0.75),
+                                  // CARD BRANCO 
+                                  color: Colors.white,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: TextField(
                                   controller: pesquisaController,
                                   decoration: InputDecoration(
-                                    hintText: 'Pesquisar',
                                     hintStyle: const TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey,
+                                      color: Colors.white,
                                     ),
                                     prefixIcon: const Icon(
                                       Icons.search,

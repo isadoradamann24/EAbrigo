@@ -5,20 +5,7 @@ import '../services/banco_service.dart';
 import '../screens/controle_screen.dart';
 import '../screens/login_screen.dart';
 
-/// Cabeçalho padrão do app: logo + botão de menu (lista as cidades
-/// para navegação rápida e o acesso a Login) + ícone de admin.
-///
-/// Use este widget no topo de qualquer tela, no lugar do Container
-/// de cabeçalho que antes era duplicado em cada arquivo:
-///
-/// ```dart
-/// Column(
-///   children: [
-///     const Cabecalho(),
-///     Expanded(child: ...),
-///   ],
-/// )
-/// ```
+
 class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
   const Cabecalho({super.key});
 
@@ -158,8 +145,8 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
             padding: const EdgeInsets.only(left: 7),
             child: Image.asset(
               'imgs/logo.png',
-              width: 57,
-              height: 50,
+              width: 60,
+              height: 55,
               fit: BoxFit.contain,
             ),
           ),
@@ -172,7 +159,7 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(
               Icons.menu,
               color: Colors.black,
-              size: 23,
+              size: 25,
             ),
           ),
 
@@ -182,7 +169,7 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(
               Icons.person_outline,
               color: Colors.black,
-              size: 21,
+              size: 24,
             ),
           ),
 

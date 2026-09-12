@@ -56,12 +56,12 @@ class EAbrigoApp extends StatelessWidget {
             ),
 
             padding: const EdgeInsets.symmetric(
-              vertical: 14,
-              horizontal: 20,
+              vertical: 40,
+              horizontal: 48,
             ),
 
             textStyle: const TextStyle(
-              fontSize: 16,
+              fontSize: 30,
               fontWeight: FontWeight.normal,
             ),
           ),

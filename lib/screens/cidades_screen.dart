@@ -111,8 +111,8 @@ class _CidadesScreenState extends State<CidadesScreen> {
                                           const EdgeInsets.only(bottom: 14),
                                       child: Center(
                                         child: SizedBox(
-                                          width: 195,
-                                          height: 34,
+                                          width: 270,
+                                          height: 40,
                                           child: OutlinedButton(
                                             onPressed: () =>
                                                 selecionarCidade(cidade),
@@ -121,9 +121,7 @@ class _CidadesScreenState extends State<CidadesScreen> {
                                               // (deixa a marca d'água
                                               // aparecer por trás)
                                               backgroundColor:
-                                                  Colors.white.withOpacity(
-                                                0.75,
-                                              ),
+                                                  Colors.white,
                                               foregroundColor: Colors.black,
                                               padding: EdgeInsets.zero,
                                               side: const BorderSide(

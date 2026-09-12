@@ -74,9 +74,6 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
               color: destaqueNegativo
                   ? Colors.red[100]
                   : corPadrao.withOpacity(0.85),
-              // CORRIGIDO: BorderSide não tem método toBorder().
-              // Para um contorno uniforme (mesma cor/largura nos
-              // 4 lados) o certo é usar Border.all(...).
               border: Border.all(
                 color: const Color(0xFF7A82B5),
                 width: 1,
@@ -141,11 +138,11 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
 
                                   // BAIRRO SELECIONADO
                                   Container(
-                                    width: 192,
+                                    width: double.infinity,
                                     height: 34,
                                     decoration: BoxDecoration(
-                                      // CARD BRANCO TRANSPARENTE
-                                      color: Colors.white.withOpacity(0.75),
+                                      // CARD BRANCO 
+                                      color: Colors.white,
                                       border: Border.all(
                                         color: Colors.black87,
                                         width: 1,

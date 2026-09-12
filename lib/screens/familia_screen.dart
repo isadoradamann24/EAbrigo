@@ -27,6 +27,11 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
 
   bool carregando = true;
 
+  // Família atualmente selecionada para edição (null = modo cadastro)
+  Familia? familiaSelecionada;
+
+  bool get modoEdicao => familiaSelecionada != null;
+
   @override
   void initState() {
     super.initState();
@@ -36,10 +41,34 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     pesquisaController.addListener(() {
       setState(() {});
     });
+
+    // Atualiza a tela (habilita/desabilita o botão) sempre que
+    // algum campo do formulário mudar.
+    responsavelController.addListener(_atualizarTela);
+    bairroController.addListener(_atualizarTela);
+    enderecoController.addListener(_atualizarTela);
+    telefoneController.addListener(_atualizarTela);
+  }
+
+  void _atualizarTela() {
+    setState(() {});
+  }
+
+  // Verdadeiro somente quando os 4 campos estão preenchidos
+  bool get _todosCamposPreenchidos {
+    return responsavelController.text.trim().isNotEmpty &&
+        bairroController.text.trim().isNotEmpty &&
+        enderecoController.text.trim().isNotEmpty &&
+        telefoneController.text.trim().isNotEmpty;
   }
 
   @override
   void dispose() {
+    responsavelController.removeListener(_atualizarTela);
+    bairroController.removeListener(_atualizarTela);
+    enderecoController.removeListener(_atualizarTela);
+    telefoneController.removeListener(_atualizarTela);
+
     responsavelController.dispose();
     bairroController.dispose();
     enderecoController.dispose();
@@ -87,20 +116,37 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     }).toList();
   }
 
-  Future<void> cadastrarFamilia() async {
+  // ==================================================
+  // VALIDAÇÃO: todos os campos precisam estar preenchidos
+  // ==================================================
+  bool _camposValidos() {
     final responsavel = responsavelController.text.trim();
     final bairro = bairroController.text.trim();
     final endereco = enderecoController.text.trim();
     final telefone = telefoneController.text.trim();
 
-    if (responsavel.isEmpty) {
+    if (responsavel.isEmpty ||
+        bairro.isEmpty ||
+        endereco.isEmpty ||
+        telefone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Digite o nome do responsável pela família.'),
+          content: Text('Preencha todos os campos antes de continuar.'),
         ),
       );
-      return;
+      return false;
     }
+
+    return true;
+  }
+
+  Future<void> cadastrarFamilia() async {
+    if (!_camposValidos()) return;
+
+    final responsavel = responsavelController.text.trim();
+    final bairro = bairroController.text.trim();
+    final endereco = enderecoController.text.trim();
+    final telefone = telefoneController.text.trim();
 
     final agora = DateTime.now();
 
@@ -123,10 +169,7 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
 
     if (!mounted) return;
 
-    responsavelController.clear();
-    bairroController.clear();
-    enderecoController.clear();
-    telefoneController.clear();
+    limparFormulario();
 
     await carregarFamilias();
 
@@ -134,6 +177,81 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Família cadastrada com sucesso!')),
+    );
+  }
+
+  // ==================================================
+  // SELECIONAR FAMÍLIA PARA EDITAR
+  // ==================================================
+  void selecionarFamiliaParaEdicao(Familia familia) {
+    setState(() {
+      familiaSelecionada = familia;
+      responsavelController.text = familia.responsavel;
+      bairroController.text = familia.bairro;
+      enderecoController.text = familia.endereco;
+      telefoneController.text = familia.telefone;
+    });
+  }
+
+  void cancelarEdicao() {
+    setState(() {
+      familiaSelecionada = null;
+    });
+    limparFormulario();
+  }
+
+  void limparFormulario() {
+    responsavelController.clear();
+    bairroController.clear();
+    enderecoController.clear();
+    telefoneController.clear();
+  }
+
+  // ==================================================
+  // SALVAR EDIÇÃO
+  // ==================================================
+  Future<void> salvarEdicaoFamilia() async {
+    if (familiaSelecionada == null) return;
+    if (!_camposValidos()) return;
+
+    final responsavel = responsavelController.text.trim();
+    final bairro = bairroController.text.trim();
+    final endereco = enderecoController.text.trim();
+    final telefone = telefoneController.text.trim();
+
+    final familiaAtualizada = Familia(
+      id: familiaSelecionada!.id,
+      cidadeId: familiaSelecionada!.cidadeId,
+      responsavel: responsavel,
+      bairro: bairro,
+      endereco: endereco,
+      telefone: telefone,
+      dataCadastro: familiaSelecionada!.dataCadastro,
+    );
+
+    final db = await DatabaseHelper.instance.database;
+
+    await db.update(
+      'familias',
+      familiaAtualizada.toMap()..remove('id'),
+      where: 'id = ?',
+      whereArgs: [familiaSelecionada!.id],
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      familiaSelecionada = null;
+    });
+
+    limparFormulario();
+
+    await carregarFamilias();
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Família atualizada com sucesso!')),
     );
   }
 
@@ -171,6 +289,15 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     final db = await DatabaseHelper.instance.database;
 
     await db.delete('familias', where: 'id = ?', whereArgs: [familia.id]);
+
+    // Se a família excluída era a que estava selecionada no formulário,
+    // volta pro modo cadastro.
+    if (familiaSelecionada?.id == familia.id) {
+      setState(() {
+        familiaSelecionada = null;
+      });
+      limparFormulario();
+    }
 
     await carregarFamilias();
 
@@ -253,8 +380,8 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
       width: double.infinity,
       height: 38,
       decoration: BoxDecoration(
-        // CARD BRANCO TRANSPARENTE
-        color: Colors.white.withOpacity(0.75),
+        // CARD BRANCO 
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
@@ -274,28 +401,37 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
 
   Widget _botao({
     required String texto,
-    required VoidCallback aoClicar,
+    required VoidCallback? aoClicar,
+    Color corFundo = const Color(0xFFE2E8FF),
+    Color corTexto = Colors.black,
+    Color corBorda = Colors.black,
   }) {
+    final desabilitado = aoClicar == null;
+
+    final fundoFinal = desabilitado ? Colors.grey.shade300 : corFundo;
+    final textoFinal = desabilitado ? Colors.grey.shade600 : corTexto;
+    final bordaFinal = desabilitado ? Colors.grey.shade400 : corBorda;
+
     return SizedBox(
       width: double.infinity,
       height: 36,
       child: OutlinedButton(
         onPressed: aoClicar,
         style: OutlinedButton.styleFrom(
-          backgroundColor: const Color(0xFFE2E8FF),
-          foregroundColor: Colors.black,
+          backgroundColor: fundoFinal,
+          foregroundColor: textoFinal,
           padding: EdgeInsets.zero,
-          side: const BorderSide(color: Colors.black, width: 1),
+          side: BorderSide(color: bordaFinal, width: 1),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
           elevation: 1,
         ),
         child: Text(
           texto,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.normal,
-            color: Colors.black,
+            color: textoFinal,
           ),
         ),
       ),
@@ -303,51 +439,75 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
   }
 
   Widget _cardFamilia(Familia familia) {
+    final selecionada = familiaSelecionada?.id == familia.id;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        width: double.infinity,
-        height: 45,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          // CARD BRANCO TRANSPARENTE
-          color: Colors.white.withOpacity(0.75),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                familia.responsavel,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          selecionarFamiliaParaEdicao(familia);
+        },
+        child: Container(
+          width: double.infinity,
+          height: 45,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+          decoration: BoxDecoration(
+            // CARD BRANCO 
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: selecionada
+                ? Border.all(color: Colors.black87, width: 1.5)
+                : null,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  familia.responsavel,
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                ),
               ),
-            ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              icon: const Icon(
-                Icons.visibility_outlined,
-                size: 19,
-                color: Colors.black87,
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(
+                  Icons.visibility_outlined,
+                  size: 19,
+                  color: Colors.black87,
+                ),
+                onPressed: () {
+                  visualizarFamilia(familia);
+                },
               ),
-              onPressed: () {
-                visualizarFamilia(familia);
-              },
-            ),
-            const SizedBox(width: 10),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              icon: const Icon(
-                Icons.delete_outline,
-                size: 19,
-                color: Colors.black87,
+              const SizedBox(width: 10),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(
+                  Icons.edit_outlined,
+                  size: 19,
+                  color: Colors.black87,
+                ),
+                onPressed: () {
+                  selecionarFamiliaParaEdicao(familia);
+                },
               ),
-              onPressed: () {
-                excluirFamilia(familia);
-              },
-            ),
-          ],
+              const SizedBox(width: 10),
+              IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(
+                  Icons.delete_outline,
+                  size: 19,
+                  color: Colors.black87,
+                ),
+                onPressed: () {
+                  excluirFamilia(familia);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -386,7 +546,7 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
                             width: double.infinity,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.75),
+                              color: Colors.white,
                               border: Border.all(color: Colors.black, width: 1),
                               borderRadius: BorderRadius.circular(7),
                               boxShadow: const [
@@ -406,11 +566,13 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
 
                           const SizedBox(height: 15),
 
-                          const Align(
+                          Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
-                              'Cadastrar família',
-                              style: TextStyle(
+                              modoEdicao
+                                  ? 'Editando família'
+                                  : 'Cadastrar família',
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
@@ -434,7 +596,53 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
 
                           const SizedBox(height: 15),
 
-                          _botao(texto: 'Cadastrar família', aoClicar: cadastrarFamilia),
+                          // ==================================================
+                          // BOTÕES: modo cadastro OU modo edição
+                          // ==================================================
+                          if (!modoEdicao)
+                            _botao(
+                              texto: 'Cadastrar família',
+                              aoClicar: _todosCamposPreenchidos
+                                  ? cadastrarFamilia
+                                  : null,
+                            )
+                          else
+                            Column(
+                              children: [
+                                _botao(
+                                  texto: 'Salvar edição',
+                                  aoClicar: _todosCamposPreenchidos
+                                      ? salvarEdicaoFamilia
+                                      : null,
+                                  corFundo: Colors.black87,
+                                  corTexto: Colors.white,
+                                  corBorda: Colors.black87,
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _botao(
+                                        texto: 'Excluir',
+                                        aoClicar: () {
+                                          excluirFamilia(familiaSelecionada!);
+                                        },
+                                        corFundo: Colors.white,
+                                        corTexto: Colors.red,
+                                        corBorda: Colors.red,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: _botao(
+                                        texto: 'Cancelar',
+                                        aoClicar: cancelarEdicao,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
 
                           const SizedBox(height: 20),
 
@@ -442,7 +650,7 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
                             width: double.infinity,
                             height: 31,
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.75),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: TextField(

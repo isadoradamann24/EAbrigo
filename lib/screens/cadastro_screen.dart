@@ -480,11 +480,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
     });
   }
 
-  // ==========================================================
-  // CARD-BASE DE CADA PERGUNTA
-  // Branco semi-transparente, para diferenciar visualmente as
-  // perguntas e deixar a marca d'água aparecer atrás.
-  // ==========================================================
 
   Widget _cardPergunta(Widget child) {
     return Container(
@@ -492,7 +487,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.65),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
       ),
       child: child,
@@ -522,7 +517,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
         style: const TextStyle(fontSize: 13, color: Colors.black87),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 12, color: Colors.grey),
+          hintStyle: const TextStyle(fontSize: 12, color: Colors.white),
           prefixIcon: Icon(icon, size: 19, color: Colors.black87),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
@@ -805,7 +800,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
         width: double.infinity,
         height: 36,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.75),
+          color: Colors.white,
           border: Border.all(color: Colors.black, width: 1),
           borderRadius: BorderRadius.circular(7),
           boxShadow: const [

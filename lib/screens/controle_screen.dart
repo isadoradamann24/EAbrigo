@@ -90,11 +90,11 @@ class _ControleScreenState extends State<ControleScreen> {
                         // CIDADE
                         SizedBox(
                           width: double.infinity,
-                          height: 31,
+                          height: 40,
                           child: Container(
                             decoration: BoxDecoration(
                               // CARD BRANCO TRANSPARENTE
-                              color: Colors.white.withOpacity(0.75),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(7),
                               border: Border.all(
                                 color: Colors.black87,
@@ -106,24 +106,24 @@ class _ControleScreenState extends State<ControleScreen> {
                               widget.cidade.nome,
                               style: const TextStyle(
                                 color: Colors.black87,
-                                fontSize: 12,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
 
                         // SELEÇÃO DO BAIRRO
                         SizedBox(
-                          width: 157,
-                          height: 31,
+                          width: double.infinity,
+                          height: 40,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
                             decoration: BoxDecoration(
-                              // CARD BRANCO TRANSPARENTE
-                              color: Colors.white.withOpacity(0.75),
+                              // CARD BRANCO 
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: bairros.isEmpty
@@ -131,8 +131,8 @@ class _ControleScreenState extends State<ControleScreen> {
                                     child: Text(
                                       'Nenhum abrigo',
                                       style: TextStyle(
-                                        fontSize: 11,
-                                        color: Colors.grey,
+                                        fontSize: 13,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   )
@@ -142,20 +142,20 @@ class _ControleScreenState extends State<ControleScreen> {
                                       hint: const Text(
                                         'Abrigos',
                                         style: TextStyle(
-                                          fontSize: 11,
+                                          fontSize: 14,
                                           color: Colors.black87,
                                         ),
                                       ),
                                       isExpanded: true,
                                       icon: const Icon(
                                         Icons.keyboard_arrow_down,
-                                        size: 16,
+                                        size: 20,
                                         color: Colors.black87,
                                       ),
                                       dropdownColor: Colors.white,
                                       style: const TextStyle(
                                         color: Colors.black87,
-                                        fontSize: 11,
+                                        fontSize: 14,
                                       ),
                                       items: bairros.map((bairro) {
                                         return DropdownMenuItem<String>(
@@ -163,7 +163,7 @@ class _ControleScreenState extends State<ControleScreen> {
                                           child: Text(
                                             bairro,
                                             style: const TextStyle(
-                                              fontSize: 11,
+                                              fontSize: 14,
                                               color: Colors.black87,
                                             ),
                                           ),

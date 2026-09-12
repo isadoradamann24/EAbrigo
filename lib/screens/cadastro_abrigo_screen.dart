@@ -114,7 +114,7 @@ class _CadastroAbrigoScreenState extends State<CadastroAbrigoScreen> {
     return Container(
       decoration: BoxDecoration(
         // CARD BRANCO TRANSPARENTE
-        color: Colors.white.withOpacity(0.75),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
@@ -226,8 +226,8 @@ class _CadastroAbrigoScreenState extends State<CadastroAbrigoScreen> {
                                   (bairro) => Container(
                                     margin: const EdgeInsets.only(bottom: 8),
                                     decoration: BoxDecoration(
-                                      // CARD BRANCO TRANSPARENTE
-                                      color: Colors.white.withOpacity(0.75),
+                                      // CARD BRANCO
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: ListTile(
