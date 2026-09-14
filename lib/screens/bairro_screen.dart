@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'lotacao_screen.dart';
 import 'cadastro_screen.dart';
+import 'familia_detalhes_screen.dart';
+
 import '../models/cidade.dart';
 import '../models/familia.dart';
 import '../services/banco_service.dart';
@@ -24,7 +26,8 @@ class BairroScreen extends StatefulWidget {
 class _BairroScreenState extends State<BairroScreen> {
   final BancoService banco = BancoService();
 
-  final TextEditingController pesquisaController = TextEditingController();
+  final TextEditingController pesquisaController =
+      TextEditingController();
 
   List<Familia> familias = [];
   List<Familia> familiasFiltradas = [];
@@ -46,10 +49,16 @@ class _BairroScreenState extends State<BairroScreen> {
     super.dispose();
   }
 
+  // ============================================================
+  // CARREGAR FAMÍLIAS
+  // ============================================================
+
   Future<void> carregarFamilias() async {
-    setState(() {
-      carregando = true;
-    });
+    if (mounted) {
+      setState(() {
+        carregando = true;
+      });
+    }
 
     try {
       final lista = await banco.listarFamilias();
@@ -75,13 +84,23 @@ class _BairroScreenState extends State<BairroScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao carregar famílias: $e')),
+        SnackBar(
+          content: Text(
+            'Erro ao carregar famílias: $e',
+          ),
+        ),
       );
     }
   }
 
+  // ============================================================
+  // PESQUISAR FAMÍLIA
+  // ============================================================
+
   void pesquisarFamilias() {
     final texto = pesquisaController.text.trim().toLowerCase();
+
+    if (!mounted) return;
 
     setState(() {
       if (texto.isEmpty) {
@@ -90,13 +109,19 @@ class _BairroScreenState extends State<BairroScreen> {
       }
 
       familiasFiltradas = familias.where((familia) {
-        return familia.responsavel.toLowerCase().contains(texto);
+        return familia.responsavel
+            .toLowerCase()
+            .contains(texto);
       }).toList();
     });
   }
 
-  void abrirCadastroFamilia() {
-    Navigator.push(
+  // ============================================================
+  // NOVO CADASTRO
+  // ============================================================
+
+  Future<void> abrirCadastroFamilia() async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CadastroScreen(
@@ -104,51 +129,70 @@ class _BairroScreenState extends State<BairroScreen> {
           bairro: widget.bairro,
         ),
       ),
-    ).then((_) {
-      carregarFamilias();
-    });
+    );
+
+    if (!mounted) return;
+
+    pesquisaController.clear();
+    await carregarFamilias();
   }
 
-  void abrirFormularioDaFamilia(Familia familia) {
-    Navigator.push(
+  // ============================================================
+  // DETALHES DA FAMÍLIA
+  // ============================================================
+
+  Future<void> abrirDetalhesFamilia(Familia familia) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CadastroScreen(
-          cidade: widget.cidade,
-          bairro: widget.bairro,
-          familiaExistente: familia,
+        builder: (context) => FamiliaDetalhesScreen(
+          familia: familia,
         ),
       ),
-    ).then((_) {
-      pesquisaController.clear();
-      carregarFamilias();
-    });
+    );
+
+    if (!mounted) return;
+
+    pesquisaController.clear();
+    await carregarFamilias();
   }
+
+  // ============================================================
+  // CARD DA FAMÍLIA
+  // ============================================================
 
   Widget _cardFamilia(Familia familia) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () => abrirFormularioDaFamilia(familia),
+        onTap: () => abrirDetalhesFamilia(familia),
         child: Container(
           width: double.infinity,
           height: 36,
           alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 14,
+          ),
           decoration: BoxDecoration(
-            // CARD BRANCO TRANSPARENTE
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             familia.responsavel,
-            style: const TextStyle(fontSize: 14, color: Colors.black87),
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+            ),
           ),
         ),
       ),
     );
   }
+
+  // ============================================================
+  // BOTÕES
+  // ============================================================
 
   Widget _botao({
     required String texto,
@@ -163,8 +207,13 @@ class _BairroScreenState extends State<BairroScreen> {
           backgroundColor: const Color(0xFFE2E8FF),
           foregroundColor: Colors.black,
           padding: EdgeInsets.zero,
-          side: const BorderSide(color: Colors.black, width: 1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+          side: const BorderSide(
+            color: Colors.black,
+            width: 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(7),
+          ),
         ),
         child: Text(
           texto,
@@ -183,6 +232,7 @@ class _BairroScreenState extends State<BairroScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFE2E8FF),
+
       body: SafeArea(
         child: Column(
           children: [
@@ -191,6 +241,7 @@ class _BairroScreenState extends State<BairroScreen> {
             Expanded(
               child: Stack(
                 children: [
+                  // LOGO DE FUNDO
                   Center(
                     child: Opacity(
                       opacity: 0.12,
@@ -205,10 +256,13 @@ class _BairroScreenState extends State<BairroScreen> {
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final largura = constraints.maxWidth;
-                      final paddingHorizontal = largura < 400 ? 25.0 : 40.0;
+
+                      final paddingHorizontal =
+                          largura < 400 ? 25.0 : 40.0;
 
                       return SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
+                        physics:
+                            const AlwaysScrollableScrollPhysics(),
                         child: Padding(
                           padding: EdgeInsets.only(
                             top: 29,
@@ -218,15 +272,21 @@ class _BairroScreenState extends State<BairroScreen> {
                           ),
                           child: Column(
                             children: [
+                              // ==================================================
                               // BAIRRO
+                              // ==================================================
+
                               Container(
                                 width: double.infinity,
                                 height: 36,
                                 decoration: BoxDecoration(
-                                  // CARD BRANCO 
                                   color: Colors.white,
-                                  border: Border.all(color: Colors.black, width: 1),
-                                  borderRadius: BorderRadius.circular(7),
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 1,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.circular(7),
                                   boxShadow: const [
                                     BoxShadow(
                                       color: Colors.black26,
@@ -248,9 +308,21 @@ class _BairroScreenState extends State<BairroScreen> {
 
                               const SizedBox(height: 14),
 
-                              _botao(texto: 'Família', aoClicar: abrirCadastroFamilia),
+                              // ==================================================
+                              // FAMÍLIA
+                              // ==================================================
+
+                              _botao(
+                                texto: 'Família',
+                                aoClicar:
+                                    abrirCadastroFamilia,
+                              ),
 
                               const SizedBox(height: 15),
+
+                              // ==================================================
+                              // LOTAÇÃO
+                              // ==================================================
 
                               _botao(
                                 texto: 'Lotação',
@@ -258,7 +330,8 @@ class _BairroScreenState extends State<BairroScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => LotacaoScreen(
+                                      builder: (context) =>
+                                          LotacaoScreen(
                                         cidade: widget.cidade,
                                         bairro: widget.bairro,
                                       ),
@@ -269,38 +342,59 @@ class _BairroScreenState extends State<BairroScreen> {
 
                               const SizedBox(height: 15),
 
+                              // ==================================================
                               // PESQUISA
+                              // ==================================================
+
                               Container(
                                 width: double.infinity,
                                 height: 35,
                                 decoration: BoxDecoration(
-                                  // CARD BRANCO 
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius:
+                                      BorderRadius.circular(20),
                                 ),
                                 child: TextField(
-                                  controller: pesquisaController,
+                                  controller:
+                                      pesquisaController,
                                   decoration: InputDecoration(
-                                    hintStyle: const TextStyle(
+                                    hintText:
+                                        'Pesquisar família',
+                                    hintStyle:
+                                        const TextStyle(
                                       fontSize: 12,
-                                      color: Colors.white,
+                                      color: Colors.grey,
                                     ),
-                                    prefixIcon: const Icon(
+                                    prefixIcon:
+                                        const Icon(
                                       Icons.search,
                                       size: 18,
                                       color: Colors.black87,
                                     ),
-                                    suffixIcon: pesquisaController.text.isNotEmpty
-                                        ? IconButton(
-                                            padding: EdgeInsets.zero,
-                                            icon: const Icon(Icons.close, size: 17),
-                                            onPressed: () {
-                                              pesquisaController.clear();
-                                            },
-                                          )
-                                        : null,
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
+                                    suffixIcon:
+                                        pesquisaController
+                                                .text
+                                                .isNotEmpty
+                                            ? IconButton(
+                                                padding:
+                                                    EdgeInsets
+                                                        .zero,
+                                                icon:
+                                                    const Icon(
+                                                  Icons.close,
+                                                  size: 17,
+                                                ),
+                                                onPressed: () {
+                                                  pesquisaController
+                                                      .clear();
+                                                },
+                                              )
+                                            : null,
+                                    border:
+                                        InputBorder.none,
+                                    contentPadding:
+                                        const EdgeInsets
+                                            .symmetric(
                                       vertical: 7,
                                       horizontal: 10,
                                     ),
@@ -310,26 +404,55 @@ class _BairroScreenState extends State<BairroScreen> {
 
                               const SizedBox(height: 15),
 
+                              // ==================================================
+                              // CARREGANDO
+                              // ==================================================
+
                               if (carregando)
                                 const SizedBox(
                                   width: 20,
                                   height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child:
+                                      CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
 
-                              if (!carregando)
-                                ...familiasFiltradas.map((familia) {
-                                  return _cardFamilia(familia);
-                                }),
+                              // ==================================================
+                              // LISTA DE FAMÍLIAS
+                              // ==================================================
 
-                              if (!carregando && familiasFiltradas.isEmpty)
+                              if (!carregando)
+                                ...familiasFiltradas.map(
+                                  (familia) {
+                                    return _cardFamilia(
+                                      familia,
+                                    );
+                                  },
+                                ),
+
+                              // ==================================================
+                              // NENHUMA FAMÍLIA
+                              // ==================================================
+
+                              if (!carregando &&
+                                  familiasFiltradas
+                                      .isEmpty)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 10),
+                                  padding:
+                                      const EdgeInsets.only(
+                                    top: 10,
+                                  ),
                                   child: Text(
-                                    pesquisaController.text.isEmpty
+                                    pesquisaController
+                                            .text
+                                            .isEmpty
                                         ? 'Nenhuma família cadastrada neste bairro.'
                                         : 'Nenhuma família encontrada.',
-                                    style: const TextStyle(
+                                    textAlign:
+                                        TextAlign.center,
+                                    style:
+                                        const TextStyle(
                                       fontSize: 12,
                                       color: Colors.black54,
                                     ),

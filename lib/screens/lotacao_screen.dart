@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import '../models/cidade.dart';
 import '../widgets/cabecalho.dart';
+import '../services/acesso_admin.dart';
 
 class LotacaoScreen extends StatefulWidget {
   final Cidade cidade;
@@ -18,7 +19,8 @@ class LotacaoScreen extends StatefulWidget {
   State<LotacaoScreen> createState() => _LotacaoScreenState();
 }
 
-class _LotacaoScreenState extends State<LotacaoScreen> {
+class _LotacaoScreenState extends State<LotacaoScreen>
+    with WidgetsBindingObserver {
   LotacaoInfo? lotacao;
   bool carregando = true;
 
@@ -27,31 +29,244 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+
     carregarLotacao();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+
+    super.dispose();
+  }
+
+  // ============================================================
+  // ATUALIZA A LOTAÇÃO QUANDO O APP VOLTA PARA A TELA
+  // ============================================================
+
+  @override
+  void didChangeAppLifecycleState(
+    AppLifecycleState state,
+  ) {
+    if (state == AppLifecycleState.resumed) {
+      carregarLotacao();
+    }
+  }
+
+  // ============================================================
+  // CARREGAR LOTAÇÃO
+  // ============================================================
+
   Future<void> carregarLotacao() async {
+    if (!mounted) return;
+
     setState(() {
       carregando = true;
     });
 
-    final resultado = await DatabaseHelper.instance.buscarLotacao(
-      cidadeId: widget.cidade.id!,
-      bairro: widget.bairro,
+    try {
+      final resultado =
+          await DatabaseHelper.instance.buscarLotacao(
+        cidadeId: widget.cidade.id!,
+        bairro: widget.bairro,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        lotacao = resultado;
+        carregando = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        carregando = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Erro ao carregar lotação: $e',
+          ),
+        ),
+      );
+    }
+  }
+
+  // ============================================================
+  // EDITAR CAPACIDADE MÁXIMA
+  // ============================================================
+  //
+  // Só admins logados (com cadastro completo) podem alterar
+  // esse número.
+  //
+  // Se ninguém estiver logado, exigirAcessoAdmin abre a tela
+  // de login.
+  //
+  // Depois que o login for realizado, o LoginScreen retorna
+  // para esta tela e o diálogo de capacidade é aberto.
+  // ============================================================
+
+  Future<void> editarCapacidade() async {
+    // Verifica se existe um usuário autorizado.
+    final podeAcessar = await exigirAcessoAdmin(context);
+
+    if (!podeAcessar || !mounted) return;
+
+    final controller = TextEditingController(
+      text: '${lotacao?.capacidade ?? 100}',
     );
 
-    if (!mounted) return;
+    final novaCapacidade = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) {
+        String? erro;
 
-    setState(() {
-      lotacao = resultado;
-      carregando = false;
-    });
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text(
+                'Capacidade máxima',
+              ),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Nova capacidade',
+                  errorText: erro,
+                ),
+                onChanged: (_) {
+                  if (erro != null) {
+                    setDialogState(() {
+                      erro = null;
+                    });
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text(
+                    'Cancelar',
+                  ),
+                ),
+
+                // ==================================================
+                // BOTÃO SALVAR
+                // ==================================================
+                //
+                // Mantém o mesmo estilo, mas com tamanho menor.
+                // ==================================================
+
+                SizedBox(
+                  height: 36,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final valor =
+                          int.tryParse(controller.text.trim());
+
+                      if (valor == null || valor < 0) {
+                        setDialogState(() {
+                          erro = 'Informe um número válido';
+                        });
+
+                        return;
+                      }
+
+                      Navigator.pop(
+                        dialogContext,
+                        valor,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 4,
+                      ),
+                      minimumSize: const Size(0, 36),
+                      tapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'Salvar',
+                      style: TextStyle(
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    controller.dispose();
+
+    if (novaCapacidade == null || !mounted) return;
+
+    // ============================================================
+    // SALVAR NOVA CAPACIDADE
+    // ============================================================
+
+    try {
+      await DatabaseHelper.instance.salvarCapacidadeAbrigo(
+        cidadeId: widget.cidade.id!,
+        bairro: widget.bairro,
+        capacidade: novaCapacidade,
+      );
+
+      if (!mounted) return;
+
+      // Recarrega os dados para atualizar:
+      // - capacidade máxima
+      // - vagas disponíveis
+      await carregarLotacao();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Capacidade máxima atualizada com sucesso.',
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Erro ao salvar capacidade: $e',
+          ),
+        ),
+      );
+    }
   }
+
+  // ============================================================
+  // LINHA DO RESUMO
+  // ============================================================
+  //
+  // O SizedBox reservado no final (com ou sem ícone) garante que
+  // os quadrados de valor fiquem sempre na mesma coluna, retos
+  // um em cima do outro, independente de a linha ter ou não o
+  // ícone de editar.
+  // ============================================================
 
   Widget _linhaResumo(
     String titulo,
     int valor, {
     bool destaqueNegativo = false,
+    VoidCallback? onEditar,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -66,6 +281,7 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
               ),
             ),
           ),
+
           Container(
             width: 50,
             height: 26,
@@ -95,10 +311,33 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
               ),
             ),
           ),
+
+          // Espaço reservado (com ou sem ícone) para manter o
+          // alinhamento dos quadrados em todas as linhas.
+          SizedBox(
+            width: 22,
+            height: 26,
+            child: onEditar == null
+                ? null
+                : Center(
+                    child: InkWell(
+                      onTap: onEditar,
+                      child: const Icon(
+                        Icons.edit,
+                        size: 16,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ),
+          ),
         ],
       ),
     );
   }
+
+  // ============================================================
+  // TELA
+  // ============================================================
 
   @override
   Widget build(BuildContext context) {
@@ -107,13 +346,19 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // ====================================================
             // CABEÇALHO
+            // ====================================================
+
             const Cabecalho(),
 
             Expanded(
               child: Stack(
                 children: [
+                  // ==================================================
                   // MARCA D'ÁGUA
+                  // ==================================================
+
                   Center(
                     child: Opacity(
                       opacity: 0.12,
@@ -125,29 +370,39 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
                     ),
                   ),
 
+                  // ==================================================
+                  // CONTEÚDO
+                  // ==================================================
+
                   carregando
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
                       : RefreshIndicator(
                           onRefresh: carregarLotacao,
                           child: SingleChildScrollView(
-                            physics: const AlwaysScrollableScrollPhysics(),
+                            physics:
+                                const AlwaysScrollableScrollPhysics(),
                             child: Center(
                               child: Column(
                                 children: [
                                   const SizedBox(height: 40),
 
+                                  // ==================================
                                   // BAIRRO SELECIONADO
+                                  // ==================================
+
                                   Container(
-                                    width: double.infinity,
-                                    height: 34,
+                                    width: 290,
+                                    height: 35,
                                     decoration: BoxDecoration(
-                                      // CARD BRANCO 
                                       color: Colors.white,
                                       border: Border.all(
                                         color: Colors.black87,
                                         width: 1,
                                       ),
-                                      borderRadius: BorderRadius.circular(7),
+                                      borderRadius:
+                                          BorderRadius.circular(7),
                                       boxShadow: const [
                                         BoxShadow(
                                           color: Colors.black26,
@@ -169,7 +424,10 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
 
                                   const SizedBox(height: 25),
 
+                                  // ==================================
                                   // RESUMO
+                                  // ==================================
+
                                   SizedBox(
                                     width: 266,
                                     child: Column(
@@ -177,16 +435,21 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
                                         _linhaResumo(
                                           'CAPACIDADE MÁXIMA',
                                           lotacao!.capacidade,
+                                          onEditar:
+                                              editarCapacidade,
                                         ),
+
                                         _linhaResumo(
                                           'PESSOAS ACOLHIDAS',
                                           lotacao!.ocupacao,
                                         ),
+
                                         _linhaResumo(
                                           'VAGAS DISPONÍVEIS',
                                           lotacao!.vagasDisponiveis,
                                           destaqueNegativo:
-                                              lotacao!.vagasDisponiveis < 0,
+                                              lotacao!.vagasDisponiveis <
+                                                  0,
                                         ),
                                       ],
                                     ),
@@ -194,26 +457,43 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
 
                                   const SizedBox(height: 25),
 
+                                  // ==================================
                                   // TABELA POR FAIXA ETÁRIA
+                                  // ==================================
+                                  //
+                                  // Largura aumentada (266 -> 274) e
+                                  // margem interna reduzida (6 -> 3)
+                                  // para o bloco terminar alinhado com
+                                  // os quadrados do resumo acima.
+                                  // ==================================
+
                                   SizedBox(
-                                    width: 266,
+                                    width: 274,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        // CARD BRANCO TRANSPARENTE
-                                        color: Colors.white.withOpacity(0.55),
-                                        borderRadius: BorderRadius.circular(10),
+                                        color: Colors.white
+                                            .withOpacity(0.55),
+                                        borderRadius:
+                                            BorderRadius.circular(10),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
+                                      padding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 3,
                                       ),
                                       child: Column(
                                         children: [
+                                          // ============================
+                                          // CABEÇALHO DA TABELA
+                                          // ============================
+
                                           Container(
                                             height: 28,
-                                            decoration: const BoxDecoration(
+                                            decoration:
+                                                const BoxDecoration(
                                               border: Border(
                                                 bottom: BorderSide(
-                                                  color: Color(0xFFFF6A45),
+                                                  color:
+                                                      Color(0xFFFF6A45),
                                                   width: 1,
                                                 ),
                                               ),
@@ -227,16 +507,21 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
                                                       'FAIXA ETÁRIA',
                                                       style: TextStyle(
                                                         fontSize: 11,
-                                                        color: Colors.black87,
+                                                        color: Colors
+                                                            .black87,
                                                       ),
                                                     ),
                                                   ),
                                                 ),
+
                                                 Container(
                                                   width: 1,
                                                   color:
-                                                      const Color(0xFFFF6A45),
+                                                      const Color(
+                                                    0xFFFF6A45,
+                                                  ),
                                                 ),
+
                                                 const Expanded(
                                                   flex: 2,
                                                   child: Center(
@@ -244,7 +529,8 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
                                                       'OCUPAÇÃO',
                                                       style: TextStyle(
                                                         fontSize: 11,
-                                                        color: Colors.black87,
+                                                        color: Colors
+                                                            .black87,
                                                       ),
                                                     ),
                                                   ),
@@ -252,92 +538,129 @@ class _LotacaoScreenState extends State<LotacaoScreen> {
                                               ],
                                             ),
                                           ),
-                                          ...DatabaseHelper.ordemFaixasEtarias
-                                              .map((faixa) {
-                                            final quantidade =
-                                                lotacao!.porFaixaEtaria[faixa] ??
-                                                    0;
 
-                                            return Container(
-                                              height: 65,
-                                              decoration: const BoxDecoration(
-                                                border: Border(
-                                                  bottom: BorderSide(
-                                                    color: Color(0xFFFF6A45),
-                                                    width: 1,
-                                                  ),
-                                                ),
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    flex: 3,
-                                                    child: Center(
-                                                      child: Text(
-                                                        faixa,
-                                                        style: const TextStyle(
-                                                          fontSize: 11,
-                                                          color:
-                                                              Colors.black87,
-                                                        ),
-                                                        textAlign:
-                                                            TextAlign.center,
+                                          // ============================
+                                          // FAIXAS ETÁRIAS
+                                          //
+                                          // A ORDEM É A MESMA DO BANCO.
+                                          // ============================
+
+                                          ...DatabaseHelper
+                                              .ordemFaixasEtarias
+                                              .map(
+                                            (faixa) {
+                                              final quantidade =
+                                                  lotacao!
+                                                          .porFaixaEtaria[
+                                                      faixa] ??
+                                                  0;
+
+                                              return Container(
+                                                height: 65,
+                                                decoration:
+                                                    const BoxDecoration(
+                                                  border: Border(
+                                                    bottom:
+                                                        BorderSide(
+                                                      color: Color(
+                                                        0xFFFF6A45,
                                                       ),
+                                                      width: 1,
                                                     ),
                                                   ),
-                                                  Container(
-                                                    width: 1,
-                                                    height: double.infinity,
-                                                    color:
-                                                        const Color(0xFFFF6A45),
-                                                  ),
-                                                  Expanded(
-                                                    flex: 2,
-                                                    child: Center(
-                                                      child: Container(
-                                                        width: 43,
-                                                        height: 26,
-                                                        alignment:
-                                                            Alignment.center,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: corPadrao
-                                                              .withOpacity(
-                                                                  0.85),
-                                                          border: Border.all(
-                                                            color: const Color(
-                                                                0xFF7A82B5),
-                                                            width: 1,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(7),
-                                                          boxShadow: const [
-                                                            BoxShadow(
-                                                              color: Colors
-                                                                  .black26,
-                                                              blurRadius: 2,
-                                                              offset:
-                                                                  Offset(1, 2),
-                                                            ),
-                                                          ],
-                                                        ),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      flex: 3,
+                                                      child: Center(
                                                         child: Text(
-                                                          '$quantidade',
+                                                          faixa,
                                                           style:
                                                               const TextStyle(
-                                                            fontSize: 12,
+                                                            fontSize: 11,
                                                             color: Colors
                                                                 .black87,
                                                           ),
+                                                          textAlign:
+                                                              TextAlign
+                                                                  .center,
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          }),
+
+                                                    Container(
+                                                      width: 1,
+                                                      height:
+                                                          double.infinity,
+                                                      color:
+                                                          const Color(
+                                                        0xFFFF6A45,
+                                                      ),
+                                                    ),
+
+                                                    Expanded(
+                                                      flex: 2,
+                                                      child: Center(
+                                                        child:
+                                                            Container(
+                                                          width: 43,
+                                                          height: 26,
+                                                          alignment:
+                                                              Alignment
+                                                                  .center,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: corPadrao
+                                                                .withOpacity(
+                                                              0.85,
+                                                            ),
+                                                            border:
+                                                                Border.all(
+                                                              color:
+                                                                  const Color(
+                                                                0xFF7A82B5,
+                                                              ),
+                                                              width: 1,
+                                                            ),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                              7,
+                                                            ),
+                                                            boxShadow:
+                                                                const [
+                                                              BoxShadow(
+                                                                color: Colors
+                                                                    .black26,
+                                                                blurRadius:
+                                                                    2,
+                                                                offset:
+                                                                    Offset(
+                                                                  1,
+                                                                  2,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          child: Text(
+                                                            '$quantidade',
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize:
+                                                                  12,
+                                                              color: Colors
+                                                                  .black87,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          ),
                                         ],
                                       ),
                                     ),

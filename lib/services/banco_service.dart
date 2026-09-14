@@ -28,14 +28,23 @@ class BancoService {
   // ============================================================
 
   /// Cadastra a família e retorna o id gerado.
-  Future<int> cadastrarFamilia(Familia familia) async {
-    final db = await _helper.database;
+Future<void> excluirFamilia(int familiaId) async {
+  final db = await _helper.database;
 
-    final mapa = familia.toMap()..remove('id');
+  await db.transaction((txn) async {
+    await txn.delete(
+      'membros_familia',
+      where: 'familia_id = ?',
+      whereArgs: [familiaId],
+    );
 
-    return await db.insert('familias', mapa);
-  }
-
+    await txn.delete(
+      'familias',
+      where: 'id = ?',
+      whereArgs: [familiaId],
+    );
+  });
+}
   /// Cadastra a família junto com todos os membros da composição
   /// familiar em uma única transação (tudo ou nada).
   Future<int> cadastrarFamiliaCompleta(
