@@ -3,26 +3,25 @@ import 'package:flutter/material.dart';
 import '../screens/login_screen.dart';
 import '../screens/sessao_usuario.dart';
 
+/// Garante que existe um admin logado, com cadastro completo,
+/// antes de liberar uma ação restrita (ex: editar a capacidade
+/// de um abrigo). Se ninguém estiver logado, abre a tela de
+/// login e espera o resultado.
+///
+/// Retorna true se o acesso pode prosseguir, false caso o
+/// usuário tenha cancelado ou o login tenha falhado.
 Future<bool> exigirAcessoAdmin(BuildContext context) async {
   if (SessaoUsuario.instance.estaLogado &&
       SessaoUsuario.instance.temCadastroCompleto) {
     return true;
   }
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text('Faça login para acessar essa área.'),
-    ),
-  );
-
-  // Dá um frame de respiro para o SnackBar terminar de se inserir
-  // na árvore ANTES de iniciar a transição de rota. Sem isso, o
-  // Flutter pode tentar mover/desmontar elementos que ainda têm
-  // dependências registradas (Theme/Directionality do SnackBar),
-  // causando o erro "_dependents.isEmpty: is not true".
-  await Future<void>.delayed(Duration.zero);
-
-  if (!context.mounted) return false;
+  // OBS: não mostramos SnackBar aqui antes do Navigator.push.
+  // A tela de login cobre a tela atual imediatamente, então o
+  // aviso não seria visto mesmo — e mostrar o SnackBar bem nesse
+  // instante causava o erro "_dependents.isEmpty: is not true"
+  // (conflito entre o OverlayEntry do SnackBar e a transição de
+  // rota acontecendo no mesmo frame).
 
   await Navigator.push(
     context,

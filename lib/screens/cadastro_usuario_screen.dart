@@ -232,7 +232,14 @@ class _CadastroUsuarioScreenState extends State<CadastroUsuarioScreen> {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : const Text('Entrar'),
+                                          : const Text(
+            'Entrar',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
                               ),
                             ),
                           ],

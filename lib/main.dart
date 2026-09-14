@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'screens/cidades_screen.dart';
@@ -41,6 +40,12 @@ class EAbrigoApp extends StatelessWidget {
         ),
 
         // Estilo padrão dos botões
+        //
+        // OBS: padding e fontSize foram reduzidos (eram 40/48 e 30,
+        // o que estourava a altura de botões colocados dentro de
+        // SizedBox com altura fixa, cortando o texto). Se algum
+        // botão específico precisar ser maior, sobrescreva o style
+        // localmente nesse botão em vez de mudar aqui.
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFE2E8FF),
@@ -56,12 +61,12 @@ class EAbrigoApp extends StatelessWidget {
             ),
 
             padding: const EdgeInsets.symmetric(
-              vertical: 40,
-              horizontal: 48,
+              vertical: 12,
+              horizontal: 24,
             ),
 
             textStyle: const TextStyle(
-              fontSize: 30,
+              fontSize: 16,
               fontWeight: FontWeight.normal,
             ),
           ),
@@ -99,4 +104,3 @@ class EAbrigoApp extends StatelessWidget {
     );
   }
 }
-

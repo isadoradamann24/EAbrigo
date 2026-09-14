@@ -147,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
-                                  color: Color.fromARGB(255, 247, 247, 247),
+                                  color: Color(0xFFFF6F5A),
                                 ),
                               ),
                               const SizedBox(height: 24),
@@ -190,7 +190,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                             color: Colors.white,
                                           ),
                                         )
-                                      : const Text('Entrar'),
+                                            : const Text(
+            'Entrar',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
                                 ),
                               ),
                             ],
