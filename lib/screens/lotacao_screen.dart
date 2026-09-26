@@ -4,6 +4,7 @@ import '../database/database_helper.dart';
 import '../models/cidade.dart';
 import '../widgets/cabecalho.dart';
 import '../services/acesso_admin.dart';
+import 'especificidades_screen.dart';
 
 class LotacaoScreen extends StatefulWidget {
   final Cidade cidade;
@@ -499,6 +500,58 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                                                         0,
                                               ),
                                             ],
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 25),
+
+                                        // BOTÃO ESPECIFICIDADES
+                                        //
+                                        // Mostra quem, no bairro, tem
+                                        // comorbidade, deficiência ou usa
+                                        // medicação de uso contínuo, e de
+                                        // qual família a pessoa é.
+
+                                        SizedBox(
+                                          width: 266,
+                                          height: 38,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      EspecificidadesScreen(
+                                                    cidade: widget.cidade,
+                                                    bairro: widget.bairro,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            icon: const Icon(
+                                              Icons.accessible,
+                                              size: 18,
+                                            ),
+                                            label: const Text(
+                                              'Especificidades',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.white,
+                                              foregroundColor:
+                                                  Colors.black87,
+                                              elevation: 2,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                side: const BorderSide(
+                                                  color: Color(0xFF7A82B5),
+                                                  width: 1,
+                                                ),
+                                              ),
+                                            ),
                                           ),
                                         ),
 

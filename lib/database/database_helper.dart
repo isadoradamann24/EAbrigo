@@ -30,17 +30,15 @@ class DatabaseHelper {
     );
   }
 
-  // ============================================================
+
   // CRIAÇÃO DO BANCO
-  // ============================================================
+
 
   Future<void> _createDB(
     Database db,
     int version,
   ) async {
-    // ==========================================================
     // TABELA CIDADES
-    // ==========================================================
 
     await db.execute('''
       CREATE TABLE cidades (
@@ -49,9 +47,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // ==========================================================
     // TABELA FAMÍLIAS
-    // ==========================================================
 
     await db.execute('''
       CREATE TABLE familias (
@@ -92,9 +88,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // ==========================================================
     // TABELA MEMBROS DA FAMÍLIA
-    // ==========================================================
 
     await db.execute('''
       CREATE TABLE membros_familia (
@@ -111,9 +105,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // ==========================================================
     // TABELA LOTAÇÃO
-    // ==========================================================
 
     await db.execute('''
       CREATE TABLE lotacao (
@@ -127,9 +119,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // ==========================================================
     // TABELA USUÁRIOS
-    // ==========================================================
 
     await db.execute('''
       CREATE TABLE usuarios (
@@ -142,9 +132,7 @@ class DatabaseHelper {
       )
     ''');
 
-    // ==========================================================
     // CIDADES INICIAIS
-    // ==========================================================
 
     const cidadesIniciais = [
       'Agronômica',
@@ -164,9 +152,9 @@ class DatabaseHelper {
     }
   }
 
-  // ============================================================
+
   // ATUALIZAÇÃO DO BANCO
-  // ============================================================
+
 
   Future<void> _onUpgrade(
     Database db,
@@ -174,9 +162,7 @@ class DatabaseHelper {
     int newVersion,
   ) async {
 
-    // ==========================================================
     // VERSÃO 3
-    // ==========================================================
 
     if (oldVersion < 3) {
       final novasColunasFamilias = <String>[
@@ -222,9 +208,7 @@ class DatabaseHelper {
       );
     }
 
-    // ==========================================================
     // VERSÃO 4
-    // ==========================================================
 
     if (oldVersion < 4) {
       await db.execute('''
@@ -239,9 +223,7 @@ class DatabaseHelper {
       ''');
     }
 
-    // ==========================================================
     // VERSÃO 5
-    // ==========================================================
 
     if (oldVersion < 5) {
       await db.execute(
@@ -249,7 +231,6 @@ class DatabaseHelper {
       );
     }
 
-    // ==========================================================
     // VERSÃO 6
     // Capacidade máxima dos abrigos = 100
     //
@@ -258,7 +239,6 @@ class DatabaseHelper {
     // partir de agora a capacidade pode ser alterada pelo admin
     // através de salvarCapacidadeAbrigo, sem precisar de uma
     // nova migração.
-    // ==========================================================
 
     if (oldVersion < 6) {
       await db.execute('''
@@ -267,12 +247,10 @@ class DatabaseHelper {
       ''');
     }
 
-    // ==========================================================
     // VERSÃO 8
     // Recria as 7 cidades padrão, caso tenham sido removidas
     // do banco (ex: apagadas manualmente ou por engano).
     // Não duplica: só insere as que estiverem faltando.
-    // ==========================================================
 
     if (oldVersion < 8) {
       const cidadesPadrao = [
@@ -302,9 +280,9 @@ class DatabaseHelper {
     }
   }
 
-  // ============================================================
+
   // IDADE A PARTIR DA DATA DE NASCIMENTO
-  // ============================================================
+
 
   int? calcularIdade(String? dataNascimento) {
     if (dataNascimento == null ||
@@ -348,11 +326,11 @@ class DatabaseHelper {
     }
   }
 
-  // ============================================================
+
   // FAIXAS ETÁRIAS
   //
   // MANTIDA A ORDEM ORIGINAL DA LOTAÇÃO
-  // ============================================================
+
 
   static const List<String> ordemFaixasEtarias = [
     'Até 2 anos',
@@ -387,13 +365,13 @@ class DatabaseHelper {
     return '60 anos ou mais';
   }
 
-  // ============================================================
+
   // BUSCAR TODAS AS IDADES DO ABRIGO
   //
   // Conta:
   // - idade do responsável;
   // - idade de cada membro da família.
-  // ============================================================
+
 
   Future<List<int>> buscarIdadesPorBairro({
     required int cidadeId,
@@ -469,14 +447,14 @@ class DatabaseHelper {
     return idades;
   }
 
-  // ============================================================
+
   // CAPACIDADE DO ABRIGO
   //
   // Retorna a capacidade realmente salva na tabela 'lotacao'
   // pra essa cidade/bairro. Se ainda não existe nenhum registro
   // (abrigo nunca teve a capacidade alterada), usa 100 como
   // padrão, sem gravar nada ainda.
-  // ============================================================
+
 
   Future<int> buscarCapacidadeAbrigo({
     required int cidadeId,
@@ -509,11 +487,11 @@ class DatabaseHelper {
         100;
   }
 
-  // ============================================================
+
   // SALVAR CAPACIDADE
   //
   // Grava a capacidade informada (não mais um valor fixo).
-  // ============================================================
+
 
   Future<void> salvarCapacidadeAbrigo({
     required int cidadeId,
@@ -556,9 +534,9 @@ class DatabaseHelper {
     }
   }
 
-  // ============================================================
+
   // LISTA DE ABRIGOS
-  // ============================================================
+
 
   Future<List<String>> buscarBairrosComLotacao(
     int cidadeId,
@@ -585,9 +563,9 @@ class DatabaseHelper {
         .toList();
   }
 
-  // ============================================================
+
   // LOTAÇÃO COMPLETA DO ABRIGO
-  // ============================================================
+
 
   Future<LotacaoInfo> buscarLotacao({
     required int cidadeId,
@@ -630,9 +608,72 @@ class DatabaseHelper {
     );
   }
 
-  // ============================================================
+
+  // ESPECIFICIDADES DO BAIRRO
+  //
+  // Lista os responsáveis de família do bairro que têm algum
+  // campo preenchido em:
+  // - qual_comorbidade
+  // - qual_deficiencia
+  // - qual_medicacao
+  //
+  // Regra combinada com o usuário: o critério é simplesmente o
+  // campo estar preenchido (não depende dos campos "possui_*"
+  // de sim/não). Só considera o responsável da família, os
+  // membros não têm esses campos no banco.
+
+
+  Future<List<EspecificidadeFamilia>> buscarEspecificidades({
+    required int cidadeId,
+    required String bairro,
+  }) async {
+    final db = await database;
+
+    final resultado = await db.query(
+      'familias',
+      columns: [
+        'id',
+        'responsavel',
+        'qual_comorbidade',
+        'qual_deficiencia',
+        'qual_medicacao',
+      ],
+      where: '''
+        cidade_id = ? AND bairro = ? AND (
+          (qual_comorbidade IS NOT NULL AND TRIM(qual_comorbidade) != '') OR
+          (qual_deficiencia IS NOT NULL AND TRIM(qual_deficiencia) != '') OR
+          (qual_medicacao IS NOT NULL AND TRIM(qual_medicacao) != '')
+        )
+      ''',
+      whereArgs: [
+        cidadeId,
+        bairro,
+      ],
+      orderBy: 'responsavel COLLATE NOCASE',
+    );
+
+    // Só considera preenchido de verdade um texto não nulo e
+    // não vazio depois de remover espaços nas pontas.
+    String? campoPreenchido(dynamic valor) {
+      final texto = valor?.toString().trim();
+
+      return (texto == null || texto.isEmpty) ? null : texto;
+    }
+
+    return resultado.map((linha) {
+      return EspecificidadeFamilia(
+        familiaId: linha['id'] as int,
+        responsavel: linha['responsavel']?.toString() ?? '',
+        comorbidade: campoPreenchido(linha['qual_comorbidade']),
+        deficiencia: campoPreenchido(linha['qual_deficiencia']),
+        medicacaoContinua: campoPreenchido(linha['qual_medicacao']),
+      );
+    }).toList();
+  }
+
+
   // FECHAR BANCO
-  // ============================================================
+
 
   Future<void> close() async {
     final db = await instance.database;
@@ -643,9 +684,7 @@ class DatabaseHelper {
   }
 }
 
-// ================================================================
 // MODELO DA LOTAÇÃO
-// ================================================================
 
 class LotacaoInfo {
   final int capacidade;
@@ -663,4 +702,29 @@ class LotacaoInfo {
 
     return vagas < 0 ? 0 : vagas;
   }
+}
+
+// MODELO DE ESPECIFICIDADE (comorbidade / deficiência / medicação)
+
+class EspecificidadeFamilia {
+  final int familiaId;
+  final String responsavel;
+  final String? comorbidade;
+  final String? deficiencia;
+  final String? medicacaoContinua;
+
+  EspecificidadeFamilia({
+    required this.familiaId,
+    required this.responsavel,
+    this.comorbidade,
+    this.deficiencia,
+    this.medicacaoContinua,
+  });
+
+  // Útil caso a lista precise ser filtrada/checada em algum
+  // outro lugar da tela.
+  bool get temAlgumaNecessidade =>
+      comorbidade != null ||
+      deficiencia != null ||
+      medicacaoContinua != null;
 }
