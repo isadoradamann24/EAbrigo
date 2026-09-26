@@ -28,7 +28,9 @@ class _CidadesScreenState extends State<CidadesScreen> {
     setState(() => carregando = true);
 
     final resultado = await banco.listarCidades();
-
+    for (var resultados in resultado) {
+        print(resultados);
+    }
     if (!mounted) return;
 
     setState(() {
@@ -40,8 +42,65 @@ class _CidadesScreenState extends State<CidadesScreen> {
   void selecionarCidade(Cidade cidade) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => ControleScreen(cidade: cidade)),
+      MaterialPageRoute(
+        builder: (context) => ControleScreen(cidade: cidade),
+      ),
     );
+  }
+
+  // ==================================================
+  // BOTÃO DE CADA CIDADE
+  //
+  // Continua um embaixo do outro tanto no celular
+  // quanto no tablet.
+  //
+  // No celular: mantém 270px.
+  // No tablet: aumenta proporcionalmente, mas possui
+  // um limite máximo para não ficar exageradamente largo.
+  // ==================================================
+  Widget _botaoCidade(Cidade cidade) {
+    final larguraTela = MediaQuery.of(context).size.width;
+
+    final larguraBotao = larguraTela < 600
+        ? 270.0
+        : (larguraTela * 0.65).clamp(270.0, 500.0);
+
+    return Center( child: Padding(
+      padding: const EdgeInsets.only(bottom: 20, top: 20),
+      child: Center(
+        child: SizedBox(
+          width: larguraBotao,
+          height: 50,
+          child: OutlinedButton(
+            onPressed: () => selecionarCidade(cidade),
+            style: OutlinedButton.styleFrom(
+              // CARD BRANCO TRANSPARENTE
+              // (deixa a marca d'água aparecer por trás)
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              padding: EdgeInsets.zero,
+              side: const BorderSide(
+                color: Colors.black,
+                width: 1,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(7),
+              ),
+              elevation: 1,
+            ),
+          child: Text(
+  cidade.nome,
+  textAlign: TextAlign.center,
+  style: const TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+    color: Colors.black,
+  ),
+),
+          ),
+        ),
+      ),
+    ));
   }
 
   @override
@@ -65,17 +124,19 @@ class _CidadesScreenState extends State<CidadesScreen> {
                   // MARCA D'ÁGUA
                   Center(
                     child: Opacity(
-                      opacity: 0.12,
+                      opacity: 0.14,
                       child: Image.asset(
                         'imgs/logofosca.png',
-                        width: 250,
+                        width: 500,
                         fit: BoxFit.contain,
                       ),
                     ),
                   ),
 
                   carregando
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(
+                          child: CircularProgressIndicator(),
+                        )
                       : RefreshIndicator(
                           onRefresh: carregarCidades,
                           child: cidades.isEmpty
@@ -95,7 +156,7 @@ class _CidadesScreenState extends State<CidadesScreen> {
                                     ),
                                   ],
                                 )
-                              : ListView.builder(
+                              : Center(child:ListView.builder(
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.only(
@@ -104,51 +165,11 @@ class _CidadesScreenState extends State<CidadesScreen> {
                                   ),
                                   itemCount: cidades.length,
                                   itemBuilder: (context, index) {
-                                    final cidade = cidades[index];
-
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 14),
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 270,
-                                          height: 40,
-                                          child: OutlinedButton(
-                                            onPressed: () =>
-                                                selecionarCidade(cidade),
-                                            style: OutlinedButton.styleFrom(
-                                              // CARD BRANCO TRANSPARENTE
-                                              // (deixa a marca d'água
-                                              // aparecer por trás)
-                                              backgroundColor:
-                                                  Colors.white,
-                                              foregroundColor: Colors.black,
-                                              padding: EdgeInsets.zero,
-                                              side: const BorderSide(
-                                                color: Colors.black,
-                                                width: 1,
-                                              ),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(7),
-                                              ),
-                                              elevation: 1,
-                                            ),
-                                            child: Text(
-                                              cidade.nome,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.normal,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                    return _botaoCidade(
+                                      cidades[index],
                                     );
                                   },
-                                ),
+                                )),
                         ),
                 ],
               ),

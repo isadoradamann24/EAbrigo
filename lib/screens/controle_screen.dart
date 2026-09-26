@@ -5,7 +5,6 @@ import '../models/familia.dart';
 import '../services/banco_service.dart';
 import '../widgets/cabecalho.dart';
 
-
 import 'familia_screen.dart';
 import 'familia_detalhes_screen.dart';
 import 'lotacao_screen.dart';
@@ -307,7 +306,7 @@ class _ControleScreenState
                       opacity: 0.12,
                       child: Image.asset(
                         'imgs/logofosca.png',
-                        width: 250,
+                        width: 500,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -316,311 +315,322 @@ class _ControleScreenState
                   LayoutBuilder(
                     builder:
                         (context, constraints) {
-                      final paddingHorizontal =
-                          constraints.maxWidth <
-                                  400
-                              ? 25.0
-                              : 40.0;
+
+                      // ==================================================
+                      // LARGURA RESPONSIVA PADRONIZADA
+                      //
+                      // Segue a mesma lógica da tela inicial
+                      // (CidadesScreen): no celular ocupa quase
+                      // toda a largura da tela; no tablet usa
+                      // 65% da largura, com mínimo de 270 e
+                      // máximo de 500, pra não esticar demais.
+                      // ==================================================
+                      final larguraConteudo =
+                          constraints.maxWidth < 600
+                              ? constraints.maxWidth - 80
+                              : (constraints.maxWidth * 0.65)
+                                  .clamp(270.0, 500.0);
 
                       return SingleChildScrollView(
                         physics:
                             const AlwaysScrollableScrollPhysics(),
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            top: 48,
-                            left:
-                                paddingHorizontal,
-                            right:
-                                paddingHorizontal,
-                            bottom: 40,
-                          ),
-                          child: Column(
-                            children: [
-                              // CIDADE
-                              Container(
-                                width:
-                                    double.infinity,
-                                height: 36,
-                                decoration:
-                                    BoxDecoration(
-                                  color:
-                                      Colors.white,
-                                  border:
-                                      Border.all(
-                                    color:
-                                        Colors.black,
-                                  ),
-                                  borderRadius:
-                                      BorderRadius
-                                          .circular(
-                                    7,
-                                  ),
-                                ),
-                                alignment:
-                                    Alignment.center,
-                                child: Text(
-                                  widget.cidade
-                                      .nome,
-                                  style:
-                                      const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors
-                                        .black87,
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(
-                                height: 16,
-                              ),
-
-                              // BAIRRO
-                              Container(
-                                width:
-                                    double.infinity,
-                                height: 36,
-                                padding:
-                                    const EdgeInsets
-                                        .symmetric(
-                                  horizontal: 14,
-                                ),
-                                decoration:
-                                    BoxDecoration(
-                                  color:
-                                      Colors.white,
-                                  border:
-                                      Border.all(
-                                    color:
-                                        Colors.black,
-                                  ),
-                                  borderRadius:
-                                      BorderRadius
-                                          .circular(
-                                    7,
-                                  ),
-                                ),
-                                child:
-                                    DropdownButtonHideUnderline(
-                                  child:
-                                      DropdownButton<
-                                          String>(
-                                    value:
-                                        bairroSelecionado,
-                                    hint:
-                                        const Text(
-                                      'Abrigos',
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 48,
+                              bottom: 40,
+                            ),
+                            child: SizedBox(
+                              width: larguraConteudo,
+                              child: Column(
+                                children: [
+                                  // CIDADE
+                                  Container(
+                                    width:
+                                        double.infinity,
+                                    height: 36,
+                                    decoration:
+                                        BoxDecoration(
+                                      color:
+                                          Colors.white,
+                                      border:
+                                          Border.all(
+                                        color:
+                                            Colors.black,
+                                      ),
+                                      borderRadius:
+                                          BorderRadius
+                                              .circular(
+                                        7,
+                                      ),
+                                    ),
+                                    alignment:
+                                        Alignment.center,
+                                    child: Text(
+                                      widget.cidade
+                                          .nome,
                                       style:
-                                          TextStyle(
-                                        fontSize:
-                                            14,
+                                          const TextStyle(
+                                        fontSize: 14,
                                         color: Colors
                                             .black87,
                                       ),
                                     ),
-                                    isExpanded:
-                                        true,
-                                    items: bairros
-                                        .map(
-                                          (
-                                            bairro,
-                                          ) {
-                                            return DropdownMenuItem<
-                                                String>(
-                                              value:
-                                                  bairro,
-                                              child:
-                                                  Text(
+                                  ),
+
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+
+                                  // BAIRRO
+                                  Container(
+                                    width:
+                                        double.infinity,
+                                    height: 36,
+                                    padding:
+                                        const EdgeInsets
+                                            .symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    decoration:
+                                        BoxDecoration(
+                                      color:
+                                          Colors.white,
+                                      border:
+                                          Border.all(
+                                        color:
+                                            Colors.black,
+                                      ),
+                                      borderRadius:
+                                          BorderRadius
+                                              .circular(
+                                        7,
+                                      ),
+                                    ),
+                                    child:
+                                        DropdownButtonHideUnderline(
+                                      child:
+                                          DropdownButton<
+                                              String>(
+                                        value:
+                                            bairroSelecionado,
+                                        hint:
+                                            const Text(
+                                          'Abrigos',
+                                          style:
+                                              TextStyle(
+                                            fontSize:
+                                                14,
+                                            color: Colors
+                                                .black87,
+                                          ),
+                                        ),
+                                        isExpanded:
+                                            true,
+                                        items: bairros
+                                            .map(
+                                              (
                                                 bairro,
-                                              ),
-                                            );
-                                          },
-                                        )
-                                        .toList(),
-                                    onChanged:
-                                        (valor) {
-                                      if (valor ==
+                                              ) {
+                                                return DropdownMenuItem<
+                                                    String>(
+                                                  value:
+                                                      bairro,
+                                                  child:
+                                                      Text(
+                                                    bairro,
+                                                  ),
+                                                );
+                                              },
+                                            )
+                                            .toList(),
+                                        onChanged:
+                                            (valor) {
+                                          if (valor ==
+                                              null) {
+                                            return;
+                                          }
+
+                                          setState(() {
+                                            bairroSelecionado =
+                                                valor;
+                                            pesquisaController
+                                                .clear();
+                                          });
+
+                                          carregarFamilias();
+                                        },
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(
+                                    height: 14,
+                                  ),
+
+                                  // FAMÍLIA
+                                  _botao(
+                                    texto:
+                                        'Família',
+                                    aoClicar:
+                                        novaFamilia,
+                                  ),
+
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+
+                                  // LOTAÇÃO
+                                  _botao(
+                                    texto:
+                                        'Lotação',
+                                    aoClicar: () {
+                                      if (bairroSelecionado ==
                                           null) {
+                                        ScaffoldMessenger
+                                                .of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content:
+                                                Text(
+                                              'Selecione um bairro primeiro.',
+                                            ),
+                                          ),
+                                        );
                                         return;
                                       }
 
-                                      setState(() {
-                                        bairroSelecionado =
-                                            valor;
-                                        pesquisaController
-                                            .clear();
-                                      });
-
-                                      carregarFamilias();
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) =>
+                                                  LotacaoScreen(
+                                            cidade:
+                                                widget
+                                                    .cidade,
+                                            bairro:
+                                                bairroSelecionado!,
+                                          ),
+                                        ),
+                                      );
                                     },
                                   ),
-                                ),
-                              ),
 
-                              const SizedBox(
-                                height: 14,
-                              ),
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
 
-                              // FAMÍLIA
-                              _botao(
-                                texto:
-                                    'Família',
-                                aoClicar:
-                                    novaFamilia,
-                              ),
-
-                              const SizedBox(
-                                height: 15,
-                              ),
-
-                              // LOTAÇÃO
-                              _botao(
-                                texto:
-                                    'Lotação',
-                                aoClicar: () {
-                                  if (bairroSelecionado ==
-                                      null) {
-                                    ScaffoldMessenger
-                                            .of(
-                                      context,
-                                    ).showSnackBar(
-                                      const SnackBar(
-                                        content:
-                                            Text(
-                                          'Selecione um bairro primeiro.',
+                                  // PESQUISA
+                                  Container(
+                                    width:
+                                        double.infinity,
+                                    height: 35,
+                                    decoration:
+                                        BoxDecoration(
+                                      color:
+                                          Colors.white,
+                                      borderRadius:
+                                          BorderRadius
+                                              .circular(
+                                        20,
+                                      ),
+                                    ),
+                                    child:
+                                        TextField(
+                                      controller:
+                                          pesquisaController,
+                                      decoration:
+                                          InputDecoration(
+                                        hintText:
+                                            'Pesquisar família',
+                                        hintStyle:
+                                            const TextStyle(
+                                          fontSize: 12,
+                                          color:
+                                              Colors.grey,
+                                        ),
+                                        prefixIcon:
+                                            const Icon(
+                                          Icons.search,
+                                          size: 18,
+                                          color: Colors
+                                              .black87,
+                                        ),
+                                        border:
+                                            InputBorder
+                                                .none,
+                                        contentPadding:
+                                            const EdgeInsets
+                                                .symmetric(
+                                          vertical: 7,
+                                          horizontal:
+                                              10,
                                         ),
                                       ),
-                                    );
-                                    return;
-                                  }
+                                    ),
+                                  ),
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) =>
-                                              LotacaoScreen(
-                                        cidade:
-                                            widget
-                                                .cidade,
-                                        bairro:
-                                            bairroSelecionado!,
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+
+                                  if (bairroSelecionado ==
+                                      null)
+                                    const Text(
+                                      'Selecione um bairro para visualizar as famílias.',
+                                      style:
+                                          TextStyle(
+                                        fontSize: 12,
+                                        color: Colors
+                                            .black54,
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
 
-                              const SizedBox(
-                                height: 15,
-                              ),
-
-                              // PESQUISA
-                              Container(
-                                width:
-                                    double.infinity,
-                                height: 35,
-                                decoration:
-                                    BoxDecoration(
-                                  color:
-                                      Colors.white,
-                                  borderRadius:
-                                      BorderRadius
-                                          .circular(
-                                    20,
-                                  ),
-                                ),
-                                child:
-                                    TextField(
-                                  controller:
-                                      pesquisaController,
-                                  decoration:
-                                      InputDecoration(
-                                    hintText:
-                                        'Pesquisar família',
-                                    hintStyle:
-                                        const TextStyle(
-                                      fontSize: 12,
-                                      color:
-                                          Colors.grey,
+                                  if (carregando)
+                                    const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child:
+                                          CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
                                     ),
-                                    prefixIcon:
-                                        const Icon(
-                                      Icons.search,
-                                      size: 18,
-                                      color: Colors
-                                          .black87,
+
+                                  if (!carregando)
+                                    ...familiasFiltradas
+                                        .map(
+                                      (familia) =>
+                                          _cardFamilia(
+                                        familia,
+                                      ),
                                     ),
-                                    border:
-                                        InputBorder
-                                            .none,
-                                    contentPadding:
-                                        const EdgeInsets
-                                            .symmetric(
-                                      vertical: 7,
-                                      horizontal:
-                                          10,
+
+                                  if (!carregando &&
+                                      bairroSelecionado !=
+                                          null &&
+                                      familiasFiltradas
+                                          .isEmpty)
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets
+                                              .only(
+                                        top: 10,
+                                      ),
+                                      child: Text(
+                                        'Nenhuma família cadastrada neste bairro.',
+                                        style:
+                                            TextStyle(
+                                          fontSize: 12,
+                                          color: Colors
+                                              .black54,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                ],
                               ),
-
-                              const SizedBox(
-                                height: 15,
-                              ),
-
-                              if (bairroSelecionado ==
-                                  null)
-                                const Text(
-                                  'Selecione um bairro para visualizar as famílias.',
-                                  style:
-                                      TextStyle(
-                                    fontSize: 12,
-                                    color: Colors
-                                        .black54,
-                                  ),
-                                ),
-
-                              if (carregando)
-                                const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-
-                              if (!carregando)
-                                ...familiasFiltradas
-                                    .map(
-                                  (familia) =>
-                                      _cardFamilia(
-                                    familia,
-                                  ),
-                                ),
-
-                              if (!carregando &&
-                                  bairroSelecionado !=
-                                      null &&
-                                  familiasFiltradas
-                                      .isEmpty)
-                                const Padding(
-                                  padding:
-                                      EdgeInsets
-                                          .only(
-                                    top: 10,
-                                  ),
-                                  child: Text(
-                                    'Nenhuma família cadastrada neste bairro.',
-                                    style:
-                                        TextStyle(
-                                      fontSize: 12,
-                                      color: Colors
-                                          .black54,
-                                    ),
-                                  ),
-                                ),
-                            ],
+                            ),
                           ),
                         ),
                       );

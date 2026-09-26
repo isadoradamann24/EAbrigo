@@ -99,7 +99,13 @@ class _CadastroUsuarioScreenState extends State<CadastroUsuarioScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: Colors.black87)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(
@@ -145,107 +151,135 @@ class _CadastroUsuarioScreenState extends State<CadastroUsuarioScreen> {
                       ),
                     ),
                   ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(30),
-                    child: Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        // CARD BRANCO TRANSPARENTE (painel principal)
-                        color: Colors.white.withOpacity(0.55),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const Text(
-                              'Cadastro',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFFF6F5A),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            _campo(
-                                label: 'Usuário:',
-                                controller: usuarioController),
-                            const SizedBox(height: 12),
-                            _campo(
-                              label: 'Email:',
-                              controller: emailController,
-                              keyboardType: TextInputType.emailAddress,
-                            ),
-                            const SizedBox(height: 12),
-                            _campo(
-                              label: 'CPF:',
-                              controller: cpfController,
-                              keyboardType: TextInputType.number,
-                            ),
-                            const SizedBox(height: 12),
-                            _campo(
-                              label: 'Telefone:',
-                              controller: telefoneController,
-                              keyboardType: TextInputType.phone,
-                            ),
-                            const SizedBox(height: 12),
-                            _campo(
-                              label: 'Senha:',
-                              controller: senhaController,
-                              senha: true,
-                            ),
-                            const SizedBox(height: 12),
-                            _campo(
-                              label: 'Confirmar Senha:',
-                              controller: confirmarSenhaController,
-                              senha: true,
-                            ),
-                            const SizedBox(height: 10),
-                            TextButton(
-                              onPressed: abrirLogin,
-                              child: const Text(
-                                'Fazer Login',
-                                style: TextStyle(
-                                    color: Colors.black54, fontSize: 12),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            SizedBox(
-                              height: 44,
-                              child: ElevatedButton(
-                                onPressed: salvando ? null : cadastrar,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFF6F5A),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(24),
+
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final paddingHorizontal =
+                          constraints.maxWidth < 400
+                              ? 25.0
+                              : 50.0;
+
+                      final paddingTop =
+                          constraints.maxWidth < 400
+                              ? 45.0
+                              : 60.0;
+
+                      return Center(child: SingleChildScrollView(
+                        padding: EdgeInsets.only(
+                          top: paddingTop,
+                          left: paddingHorizontal,
+                          right: paddingHorizontal,
+                          bottom: 30,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            // CARD BRANCO TRANSPARENTE (painel principal)
+                            color: Colors.white.withOpacity(0.55),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Text(
+                                  'Cadastro',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFFF6F5A),
                                   ),
                                 ),
-                                child: salvando
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                          : const Text(
-            'Entrar',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-                              ),
+                                const SizedBox(height: 20),
+                                _campo(
+                                  label: 'Usuário:',
+                                  controller: usuarioController,
+                                ),
+                                const SizedBox(height: 12),
+                                _campo(
+                                  label: 'Email:',
+                                  controller: emailController,
+                                  keyboardType:
+                                      TextInputType.emailAddress,
+                                ),
+                                const SizedBox(height: 12),
+                                _campo(
+                                  label: 'CPF:',
+                                  controller: cpfController,
+                                  keyboardType: TextInputType.number,
+                                ),
+                                const SizedBox(height: 12),
+                                _campo(
+                                  label: 'Telefone:',
+                                  controller: telefoneController,
+                                  keyboardType: TextInputType.phone,
+                                ),
+                                const SizedBox(height: 12),
+                                _campo(
+                                  label: 'Senha:',
+                                  controller: senhaController,
+                                  senha: true,
+                                ),
+                                const SizedBox(height: 12),
+                                _campo(
+                                  label: 'Confirmar Senha:',
+                                  controller: confirmarSenhaController,
+                                  senha: true,
+                                ),
+                                const SizedBox(height: 10),
+                                TextButton(
+                                  onPressed: abrirLogin,
+                                  child: const Text(
+                                    'Fazer Login',
+                                    style: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                SizedBox(
+                                  height: 44,
+                                  child: ElevatedButton(
+                                    onPressed:
+                                        salvando ? null : cadastrar,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          const Color(0xFFFF6F5A),
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(24),
+                                      ),
+                                    ),
+                                    child: salvando
+                                        ? const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child:
+                                                CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Entrar',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
+                      ));
+                    },
                   ),
                 ],
               ),

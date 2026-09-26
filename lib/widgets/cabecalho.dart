@@ -5,12 +5,11 @@ import '../services/banco_service.dart';
 import '../screens/controle_screen.dart';
 import '../screens/login_screen.dart';
 
-
 class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
   const Cabecalho({super.key});
 
   @override
-  Size get preferredSize => const Size.fromHeight(53);
+  Size get preferredSize => const Size.fromHeight(65);
 
   Future<void> _abrirMenu(BuildContext context) async {
     final banco = BancoService();
@@ -26,13 +25,16 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
           alignment: Alignment.topLeft,
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(top: 53, left: 4),
+              padding: const EdgeInsets.only(
+                top: 70,
+                left: 7,
+              ),
               child: Material(
                 borderRadius: BorderRadius.circular(12),
                 elevation: 6,
                 child: Container(
                   width: 210,
-                  constraints: const BoxConstraints(maxHeight: 420),
+                  constraints: const BoxConstraints(maxHeight: 500),
                   padding: const EdgeInsets.symmetric(
                     vertical: 14,
                     horizontal: 18,
@@ -91,7 +93,10 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
                                 ),
                               ),
                             const SizedBox(height: 12),
-                            const Divider(height: 1, color: Colors.black26),
+                            const Divider(
+                              height: 1,
+                              color: Colors.black26,
+                            ),
                             const SizedBox(height: 12),
                             InkWell(
                               onTap: () {
@@ -99,7 +104,8 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const LoginScreen(),
+                                    builder: (context) =>
+                                        const LoginScreen(),
                                   ),
                                 );
                               },
@@ -128,14 +134,16 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
   void _abrirLogin(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 53,
+      height: 65,
       width: double.infinity,
       color: Colors.white,
       child: Row(
@@ -145,8 +153,8 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
             padding: const EdgeInsets.only(left: 7),
             child: Image.asset(
               'imgs/logo.png',
-              width: 60,
-              height: 55,
+              width: 80,
+              height: 68,
               fit: BoxFit.contain,
             ),
           ),
@@ -159,7 +167,7 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(
               Icons.menu,
               color: Colors.black,
-              size: 25,
+              size: 29,
             ),
           ),
 
@@ -169,14 +177,13 @@ class Cabecalho extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(
               Icons.person_outline,
               color: Colors.black,
-              size: 24,
+              size: 27,
             ),
           ),
 
-          const SizedBox(width: 2),
+          const SizedBox(width: 4),
         ],
       ),
     );
   }
 }
-

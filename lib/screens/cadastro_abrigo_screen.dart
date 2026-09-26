@@ -149,7 +149,7 @@ class _CadastroAbrigoScreenState extends State<CadastroAbrigoScreen> {
                       opacity: 0.12,
                       child: Image.asset(
                         'imgs/logofosca.png',
-                        width: 250,
+                        width: 500,
                         fit: BoxFit.contain,
                       ),
                     ),

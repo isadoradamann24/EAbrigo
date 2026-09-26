@@ -24,7 +24,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 6,
+      version: 8,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
@@ -148,18 +148,12 @@ class DatabaseHelper {
 
     const cidadesIniciais = [
       'Agronômica',
+      'Aurora',
       'Ituporanga',
-      'José Boiteux',
       'Laurentino',
       'Lontras',
-      'Presidente Getúlio',
-      'Rio do Campo',
       'Rio do Sul',
       'Taió',
-      'Ibirama',
-      'Apiúna',
-      'Pouso Redondo',
-      'Presidente Nereu',
     ];
 
     for (final nome in cidadesIniciais) {
@@ -179,31 +173,6 @@ class DatabaseHelper {
     int oldVersion,
     int newVersion,
   ) async {
-    // ==========================================================
-    // VERSÃO 2
-    // ==========================================================
-
-    if (oldVersion < 2) {
-      await db.insert(
-        'cidades',
-        {'nome': 'Ibirama'},
-      );
-
-      await db.insert(
-        'cidades',
-        {'nome': 'Apiúna'},
-      );
-
-      await db.insert(
-        'cidades',
-        {'nome': 'Pouso Redondo'},
-      );
-
-      await db.insert(
-        'cidades',
-        {'nome': 'Presidente Nereu'},
-      );
-    }
 
     // ==========================================================
     // VERSÃO 3
@@ -296,6 +265,40 @@ class DatabaseHelper {
         UPDATE lotacao
         SET capacidade = 100
       ''');
+    }
+
+    // ==========================================================
+    // VERSÃO 8
+    // Recria as 7 cidades padrão, caso tenham sido removidas
+    // do banco (ex: apagadas manualmente ou por engano).
+    // Não duplica: só insere as que estiverem faltando.
+    // ==========================================================
+
+    if (oldVersion < 8) {
+      const cidadesPadrao = [
+        'Agronômica',
+        'Aurora',
+        'Ituporanga',
+        'Laurentino',
+        'Lontras',
+        'Rio do Sul',
+        'Taió',
+      ];
+
+      for (final nome in cidadesPadrao) {
+        final existente = await db.query(
+          'cidades',
+          where: 'nome = ?',
+          whereArgs: [nome],
+        );
+
+        if (existente.isEmpty) {
+          await db.insert(
+            'cidades',
+            {'nome': nome},
+          );
+        }
+      }
     }
   }
 

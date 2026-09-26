@@ -364,7 +364,7 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                       opacity: 0.12,
                       child: Image.asset(
                         'imgs/logofosca.png',
-                        width: 250,
+                        width: 500,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -378,299 +378,321 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                       ? const Center(
                           child: CircularProgressIndicator(),
                         )
-                      : RefreshIndicator(
-                          onRefresh: carregarLotacao,
-                          child: SingleChildScrollView(
-                            physics:
-                                const AlwaysScrollableScrollPhysics(),
-                            child: Center(
-                              child: Column(
-                                children: [
-                                  const SizedBox(height: 40),
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            // MARGEM PADRONIZADA
+                            final paddingHorizontal =
+                                constraints.maxWidth < 400
+                                    ? 25.0
+                                    : 40.0;
 
-                                  // ==================================
-                                  // BAIRRO SELECIONADO
-                                  // ==================================
+                            // ZOOM MAIOR, SEM ULTRAPASSAR AS MARGENS
+                            final larguraDisponivel =
+                                constraints.maxWidth -
+                                (paddingHorizontal * 2);
 
-                                  Container(
-                                    width: 290,
-                                    height: 35,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: Colors.black87,
-                                        width: 1,
-                                      ),
-                                      borderRadius:
-                                          BorderRadius.circular(7),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 2,
-                                          offset: Offset(1, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      widget.bairro,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.black87,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
+                           final escala =
+    (larguraDisponivel / 290)
+        .clamp(0.1, 1.40);
 
-                                  const SizedBox(height: 25),
-
-                                  // ==================================
-                                  // RESUMO
-                                  // ==================================
-
-                                  SizedBox(
-                                    width: 266,
+                            return RefreshIndicator(
+                              onRefresh: carregarLotacao,
+                              child: SingleChildScrollView(
+                                physics:
+                                    const AlwaysScrollableScrollPhysics(),
+                                padding: EdgeInsets.only(
+                                  left: paddingHorizontal,
+                                  right: paddingHorizontal,
+                                ),
+                                child: Center(
+                                  child: Transform.scale(
+                                    scale: escala,
+                                    alignment: Alignment.topCenter,
                                     child: Column(
                                       children: [
-                                        _linhaResumo(
-                                          'CAPACIDADE MÁXIMA',
-                                          lotacao!.capacidade,
-                                          onEditar:
-                                              editarCapacidade,
-                                        ),
+                                        const SizedBox(height: 40),
 
-                                        _linhaResumo(
-                                          'PESSOAS ACOLHIDAS',
-                                          lotacao!.ocupacao,
-                                        ),
+                                        // ==================================
+                                        // BAIRRO SELECIONADO
+                                        // ==================================
 
-                                        _linhaResumo(
-                                          'VAGAS DISPONÍVEIS',
-                                          lotacao!.vagasDisponiveis,
-                                          destaqueNegativo:
-                                              lotacao!.vagasDisponiveis <
-                                                  0,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 25),
-
-                                  // ==================================
-                                  // TABELA POR FAIXA ETÁRIA
-                                  // ==================================
-                                  //
-                                  // Largura aumentada (266 -> 274) e
-                                  // margem interna reduzida (6 -> 3)
-                                  // para o bloco terminar alinhado com
-                                  // os quadrados do resumo acima.
-                                  // ==================================
-
-                                  SizedBox(
-                                    width: 274,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white
-                                            .withOpacity(0.55),
-                                        borderRadius:
-                                            BorderRadius.circular(10),
-                                      ),
-                                      padding:
-                                          const EdgeInsets.symmetric(
-                                        horizontal: 3,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          // ============================
-                                          // CABEÇALHO DA TABELA
-                                          // ============================
-
-                                          Container(
-                                            height: 28,
-                                            decoration:
-                                                const BoxDecoration(
-                                              border: Border(
-                                                bottom: BorderSide(
-                                                  color:
-                                                      Color(0xFFFF6A45),
-                                                  width: 1,
-                                                ),
-                                              ),
+                                        Container(
+                                          width: 290,
+                                          height: 35,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border.all(
+                                              color: Colors.black87,
+                                              width: 1,
                                             ),
-                                            child: Row(
+                                            borderRadius:
+                                                BorderRadius.circular(7),
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: Colors.black26,
+                                                blurRadius: 2,
+                                                offset: Offset(1, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            widget.bairro,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black87,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 25),
+
+                                        // ==================================
+                                        // RESUMO
+                                        // ==================================
+
+                                        SizedBox(
+                                          width: 266,
+                                          child: Column(
+                                            children: [
+                                              _linhaResumo(
+                                                'CAPACIDADE MÁXIMA',
+                                                lotacao!.capacidade,
+                                                onEditar:
+                                                    editarCapacidade,
+                                              ),
+
+                                              _linhaResumo(
+                                                'PESSOAS ACOLHIDAS',
+                                                lotacao!.ocupacao,
+                                              ),
+
+                                              _linhaResumo(
+                                                'VAGAS DISPONÍVEIS',
+                                                lotacao!.vagasDisponiveis,
+                                                destaqueNegativo:
+                                                    lotacao!.vagasDisponiveis <
+                                                        0,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+
+                                        const SizedBox(height: 25),
+
+                                        // ==================================
+                                        // TABELA POR FAIXA ETÁRIA
+                                        // ==================================
+
+                                        SizedBox(
+                                          width: 274,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white
+                                                  .withOpacity(0.55),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            padding:
+                                                const EdgeInsets.symmetric(
+                                              horizontal: 3,
+                                            ),
+                                            child: Column(
                                               children: [
-                                                const Expanded(
-                                                  flex: 3,
-                                                  child: Center(
-                                                    child: Text(
-                                                      'FAIXA ETÁRIA',
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: Colors
-                                                            .black87,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
+                                                // ============================
+                                                // CABEÇALHO DA TABELA
+                                                // ============================
 
                                                 Container(
-                                                  width: 1,
-                                                  color:
-                                                      const Color(
-                                                    0xFFFF6A45,
-                                                  ),
-                                                ),
-
-                                                const Expanded(
-                                                  flex: 2,
-                                                  child: Center(
-                                                    child: Text(
-                                                      'OCUPAÇÃO',
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: Colors
-                                                            .black87,
+                                                  height: 28,
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    border: Border(
+                                                      bottom: BorderSide(
+                                                        color:
+                                                            Color(0xFFFF6A45),
+                                                        width: 1,
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-
-                                          // ============================
-                                          // FAIXAS ETÁRIAS
-                                          //
-                                          // A ORDEM É A MESMA DO BANCO.
-                                          // ============================
-
-                                          ...DatabaseHelper
-                                              .ordemFaixasEtarias
-                                              .map(
-                                            (faixa) {
-                                              final quantidade =
-                                                  lotacao!
-                                                          .porFaixaEtaria[
-                                                      faixa] ??
-                                                  0;
-
-                                              return Container(
-                                                height: 65,
-                                                decoration:
-                                                    const BoxDecoration(
-                                                  border: Border(
-                                                    bottom:
-                                                        BorderSide(
-                                                      color: Color(
-                                                        0xFFFF6A45,
-                                                      ),
-                                                      width: 1,
-                                                    ),
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      flex: 3,
-                                                      child: Center(
-                                                        child: Text(
-                                                          faixa,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 11,
-                                                            color: Colors
-                                                                .black87,
-                                                          ),
-                                                          textAlign:
-                                                              TextAlign
-                                                                  .center,
-                                                        ),
-                                                      ),
-                                                    ),
-
-                                                    Container(
-                                                      width: 1,
-                                                      height:
-                                                          double.infinity,
-                                                      color:
-                                                          const Color(
-                                                        0xFFFF6A45,
-                                                      ),
-                                                    ),
-
-                                                    Expanded(
-                                                      flex: 2,
-                                                      child: Center(
-                                                        child:
-                                                            Container(
-                                                          width: 43,
-                                                          height: 26,
-                                                          alignment:
-                                                              Alignment
-                                                                  .center,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: corPadrao
-                                                                .withOpacity(
-                                                              0.85,
-                                                            ),
-                                                            border:
-                                                                Border.all(
-                                                              color:
-                                                                  const Color(
-                                                                0xFF7A82B5,
-                                                              ),
-                                                              width: 1,
-                                                            ),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                              7,
-                                                            ),
-                                                            boxShadow:
-                                                                const [
-                                                              BoxShadow(
-                                                                color: Colors
-                                                                    .black26,
-                                                                blurRadius:
-                                                                    2,
-                                                                offset:
-                                                                    Offset(
-                                                                  1,
-                                                                  2,
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
+                                                  child: Row(
+                                                    children: [
+                                                      const Expanded(
+                                                        flex: 3,
+                                                        child: Center(
                                                           child: Text(
-                                                            '$quantidade',
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize:
-                                                                  12,
+                                                            'FAIXA ETÁRIA',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
                                                               color: Colors
                                                                   .black87,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+
+                                                      Container(
+                                                        width: 1,
+                                                        color:
+                                                            const Color(
+                                                          0xFFFF6A45,
+                                                        ),
+                                                      ),
+
+                                                      const Expanded(
+                                                        flex: 2,
+                                                        child: Center(
+                                                          child: Text(
+                                                            'OCUPAÇÃO',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              color: Colors
+                                                                  .black87,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              );
-                                            },
+
+                                                // ============================
+                                                // FAIXAS ETÁRIAS
+                                                //
+                                                // A ORDEM É A MESMA DO BANCO.
+                                                // ============================
+
+                                                ...DatabaseHelper
+                                                    .ordemFaixasEtarias
+                                                    .map(
+                                                  (faixa) {
+                                                    final quantidade =
+                                                        lotacao!
+                                                                .porFaixaEtaria[
+                                                            faixa] ??
+                                                        0;
+
+                                                    return Container(
+                                                      height: 65,
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                        border: Border(
+                                                          bottom:
+                                                              BorderSide(
+                                                            color: Color(
+                                                              0xFFFF6A45,
+                                                            ),
+                                                            width: 1,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(
+                                                            flex: 3,
+                                                            child: Center(
+                                                              child: Text(
+                                                                faixa,
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontSize: 11,
+                                                                  color: Colors
+                                                                      .black87,
+                                                                ),
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                              ),
+                                                            ),
+                                                          ),
+
+                                                          Container(
+                                                            width: 1,
+                                                            height:
+                                                                double.infinity,
+                                                            color:
+                                                                const Color(
+                                                              0xFFFF6A45,
+                                                            ),
+                                                          ),
+
+                                                          Expanded(
+                                                            flex: 2,
+                                                            child: Center(
+                                                              child:
+                                                                  Container(
+                                                                width: 43,
+                                                                height: 26,
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  color:
+                                                                      corPadrao
+                                                                          .withOpacity(
+                                                                    0.85,
+                                                                  ),
+                                                                  border:
+                                                                      Border.all(
+                                                                    color:
+                                                                        const Color(
+                                                                      0xFF7A82B5,
+                                                                    ),
+                                                                    width: 1,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                    7,
+                                                                  ),
+                                                                  boxShadow:
+                                                                      const [
+                                                                    BoxShadow(
+                                                                      color: Colors
+                                                                          .black26,
+                                                                      blurRadius:
+                                                                          2,
+                                                                      offset:
+                                                                          Offset(
+                                                                        1,
+                                                                        2,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                child: Text(
+                                                                  '$quantidade',
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: Colors
+                                                                        .black87,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+
+                                        const SizedBox(height: 30),
+                                      ],
                                     ),
                                   ),
-
-                                  const SizedBox(height: 30),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                 ],
               ),

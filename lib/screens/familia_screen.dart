@@ -222,7 +222,6 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     String? parentesco;
     String? identidadeGeneroMembro;
 
-    // Mensagens de erro exibidas dentro do diálogo.
     String? erroNome;
     String? erroIdade;
 
@@ -346,47 +345,45 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
                       ),
                     ),
                     onPressed: () {
-                    final nome = nomeMembroController.text.trim();
-                    final idadeTexto =
-                        idadeMembroController.text.trim();
-                    final idadeConvertida = int.tryParse(idadeTexto);
+                      final nome =
+                          nomeMembroController.text.trim();
+                      final idadeTexto =
+                          idadeMembroController.text.trim();
+                      final idadeConvertida =
+                          int.tryParse(idadeTexto);
 
-                    // ==========================================
-                    // VALIDAÇÃO
-                    //
-                    // Nome é obrigatório e a idade precisa ser um
-                    // número válido (>= 0). Antes, uma idade vazia
-                    // ou inválida virava silenciosamente "0", o
-                    // que jogava a pessoa errada na faixa etária
-                    // "Até 2 anos" da tela de lotação.
-                    // ==========================================
+                      setDialogState(() {
+                        erroNome =
+                            nome.isEmpty
+                                ? 'Informe o nome'
+                                : null;
 
-                    setDialogState(() {
-                      erroNome =
-                          nome.isEmpty ? 'Informe o nome' : null;
+                        erroIdade =
+                            (idadeConvertida == null ||
+                                    idadeConvertida < 0)
+                                ? 'Informe uma idade válida'
+                                : null;
+                      });
 
-                      erroIdade = (idadeConvertida == null ||
-                              idadeConvertida < 0)
-                          ? 'Informe uma idade válida'
-                          : null;
-                    });
+                      if (erroNome != null ||
+                          erroIdade != null) {
+                        return;
+                      }
 
-                    if (erroNome != null || erroIdade != null) {
-                      return;
-                    }
-
-                    Navigator.pop(
-                      context,
-                      MembroFamilia(
-                        nome: nome,
-                        parentesco: parentesco ?? '',
-                        idade: idadeConvertida!,
-                        escolaridade:
-                            escolaridadeMembroController.text.trim(),
-                        identidadeGenero:
-                            identidadeGeneroMembro ?? '',
-                      ),
-                    );
+                      Navigator.pop(
+                        context,
+                        MembroFamilia(
+                          nome: nome,
+                          parentesco: parentesco ?? '',
+                          idade: idadeConvertida!,
+                          escolaridade:
+                              escolaridadeMembroController
+                                  .text
+                                  .trim(),
+                          identidadeGenero:
+                              identidadeGeneroMembro ?? '',
+                        ),
+                      );
                     },
                     child: const Text('Adicionar'),
                   ),
@@ -1225,7 +1222,7 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
                       opacity: 0.12,
                       child: Image.asset(
                         'imgs/logofosca.png',
-                        width: 250,
+                        width: 500,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -1234,10 +1231,14 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
                   LayoutBuilder(
                     builder:
                         (context, constraints) {
+
+                      // ==================================================
+                      // MARGEM RESPONSIVA PADRONIZADA
+                      // ==================================================
                       final paddingHorizontal =
-                          constraints.maxWidth < 400
-                              ? 25.0
-                              : 40.0;
+                          constraints.maxWidth < 600
+                              ? 40.0
+                              : constraints.maxWidth * 0.175;
 
                       return Form(
                         key: _formKey,
@@ -1246,10 +1247,8 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
                               const AlwaysScrollableScrollPhysics(),
                           padding: EdgeInsets.only(
                             top: 29,
-                            left:
-                                paddingHorizontal,
-                            right:
-                                paddingHorizontal,
+                            left: paddingHorizontal,
+                            right: paddingHorizontal,
                             bottom: 40,
                           ),
                           child: Column(

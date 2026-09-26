@@ -15,13 +15,7 @@ Future<bool> exigirAcessoAdmin(BuildContext context) async {
       SessaoUsuario.instance.temCadastroCompleto) {
     return true;
   }
-
-  // OBS: não mostramos SnackBar aqui antes do Navigator.push.
-  // A tela de login cobre a tela atual imediatamente, então o
-  // aviso não seria visto mesmo — e mostrar o SnackBar bem nesse
-  // instante causava o erro "_dependents.isEmpty: is not true"
-  // (conflito entre o OverlayEntry do SnackBar e a transição de
-  // rota acontecendo no mesmo frame).
+  
 
   await Navigator.push(
     context,

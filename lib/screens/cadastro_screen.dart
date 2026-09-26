@@ -1135,7 +1135,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                       opacity: 0.12,
                       child: Image.asset(
                         'imgs/logofosca.png',
-                        width: 250,
+                        width: 500,
                         fit: BoxFit.contain,
                       ),
                     ),
