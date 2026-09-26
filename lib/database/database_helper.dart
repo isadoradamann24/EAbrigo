@@ -391,9 +391,9 @@ class DatabaseHelper {
     final List<int> idades = [];
 
     for (final familia in familias) {
-      // ========================================================
+   
       // RESPONSÁVEL
-      // ========================================================
+   
 
       final idadeResponsavel = calcularIdade(
         familia['data_nascimento']?.toString(),
@@ -404,9 +404,9 @@ class DatabaseHelper {
         idades.add(idadeResponsavel);
       }
 
-      // ========================================================
+   
       // MEMBROS DA FAMÍLIA
-      // ========================================================
+   
 
       final familiaId = familia['id'];
 

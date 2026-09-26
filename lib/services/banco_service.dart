@@ -11,9 +11,9 @@ import '../models/usuario.dart';
 class BancoService {
   final DatabaseHelper _helper = DatabaseHelper.instance;
 
-  // ============================================================
+
   // CIDADES
-  // ============================================================
+
 
   Future<List<Cidade>> listarCidades() async {
     final db = await _helper.database;
@@ -23,9 +23,9 @@ class BancoService {
     return resultado.map((mapa) => Cidade.fromMap(mapa)).toList();
   }
 
-  // ============================================================
+
   // FAMÍLIA
-  // ============================================================
+
 
   /// Cadastra a família e retorna o id gerado.
 Future<void> excluirFamilia(int familiaId) async {
@@ -135,9 +135,9 @@ Future<void> excluirFamilia(int familiaId) async {
     return resultado.map((mapa) => Familia.fromMap(mapa)).toList();
   }
 
-  // ============================================================
+
   // MEMBROS DA FAMÍLIA (Composição Familiar)
-  // ============================================================
+
 
   Future<int> cadastrarMembro(MembroFamilia membro) async {
     final db = await _helper.database;
@@ -169,9 +169,9 @@ Future<void> excluirFamilia(int familiaId) async {
     );
   }
 
-  // ============================================================
+
   // USUÁRIOS (LOGIN / CADASTRO DE ADMINISTRADOR)
-  // ============================================================
+
 
   String _hashSenha(String senha) {
     return sha256.convert(utf8.encode(senha)).toString();
