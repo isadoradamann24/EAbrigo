@@ -42,9 +42,9 @@ class _LotacaoScreenState extends State<LotacaoScreen>
     super.dispose();
   }
 
-  // ============================================================
+
   // ATUALIZA A LOTAÇÃO QUANDO O APP VOLTA PARA A TELA
-  // ============================================================
+
 
   @override
   void didChangeAppLifecycleState(
@@ -55,9 +55,9 @@ class _LotacaoScreenState extends State<LotacaoScreen>
     }
   }
 
-  // ============================================================
+
   // CARREGAR LOTAÇÃO
-  // ============================================================
+
 
   Future<void> carregarLotacao() async {
     if (!mounted) return;
@@ -86,19 +86,24 @@ class _LotacaoScreenState extends State<LotacaoScreen>
         carregando = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Erro ao carregar lotação: $e',
+      // Corrigido: usa context.mounted antes de acessar o
+      // ScaffoldMessenger, evitando erro caso o widget tenha
+      // saído da árvore entre o catch e essa chamada.
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erro ao carregar lotação: $e',
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 
-  // ============================================================
+
   // EDITAR CAPACIDADE MÁXIMA
-  // ============================================================
+
   //
   // Só admins logados (com cadastro completo) podem alterar
   // esse número.
@@ -108,7 +113,7 @@ class _LotacaoScreenState extends State<LotacaoScreen>
   //
   // Depois que o login for realizado, o LoginScreen retorna
   // para esta tela e o diálogo de capacidade é aberto.
-  // ============================================================
+
 
   Future<void> editarCapacidade() async {
     // Verifica se existe um usuário autorizado.
@@ -157,12 +162,9 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                   ),
                 ),
 
-                // ==================================================
                 // BOTÃO SALVAR
-                // ==================================================
                 //
                 // Mantém o mesmo estilo, mas com tamanho menor.
-                // ==================================================
 
                 SizedBox(
                   height: 36,
@@ -212,9 +214,9 @@ class _LotacaoScreenState extends State<LotacaoScreen>
 
     if (novaCapacidade == null || !mounted) return;
 
-    // ============================================================
+  
     // SALVAR NOVA CAPACIDADE
-    // ============================================================
+  
 
     try {
       await DatabaseHelper.instance.salvarCapacidadeAbrigo(
@@ -252,15 +254,15 @@ class _LotacaoScreenState extends State<LotacaoScreen>
     }
   }
 
-  // ============================================================
+
   // LINHA DO RESUMO
-  // ============================================================
+
   //
   // O SizedBox reservado no final (com ou sem ícone) garante que
   // os quadrados de valor fiquem sempre na mesma coluna, retos
   // um em cima do outro, independente de a linha ter ou não o
   // ícone de editar.
-  // ============================================================
+
 
   Widget _linhaResumo(
     String titulo,
@@ -335,9 +337,9 @@ class _LotacaoScreenState extends State<LotacaoScreen>
     );
   }
 
-  // ============================================================
+
   // TELA
-  // ============================================================
+
 
   @override
   Widget build(BuildContext context) {
@@ -355,9 +357,7 @@ class _LotacaoScreenState extends State<LotacaoScreen>
             Expanded(
               child: Stack(
                 children: [
-                  // ==================================================
                   // MARCA D'ÁGUA
-                  // ==================================================
 
                   Center(
                     child: Opacity(
@@ -370,13 +370,39 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                     ),
                   ),
 
-                  // ==================================================
-                  // CONTEÚDO
-                  // ==================================================
+// CONTEÚDO
 
-                  carregando
-                      ? const Center(
-                          child: CircularProgressIndicator(),
+                  (carregando || lotacao == null)
+                      ? Center(
+                          child: carregando
+                              ? const CircularProgressIndicator()
+                              // Se não está carregando e mesmo
+                              // assim lotacao é nulo, foi porque
+                              // deu erro. Mostra um aviso com
+                              // opção de tentar de novo, em vez
+                              // de deixar a tela em branco ou
+                              // quebrar com "null check operator".
+                              : Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'Não foi possível carregar '
+                                      'a lotação.',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ElevatedButton(
+                                      onPressed: carregarLotacao,
+                                      child: const Text(
+                                        'Tentar novamente',
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         )
                       : LayoutBuilder(
                           builder: (context, constraints) {
@@ -412,9 +438,8 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                                       children: [
                                         const SizedBox(height: 40),
 
-                                        // ==================================
                                         // BAIRRO SELECIONADO
-                                        // ==================================
+                                       
 
                                         Container(
                                           width: 290,
@@ -448,9 +473,7 @@ class _LotacaoScreenState extends State<LotacaoScreen>
 
                                         const SizedBox(height: 25),
 
-                                        // ==================================
                                         // RESUMO
-                                        // ==================================
 
                                         SizedBox(
                                           width: 266,
@@ -481,9 +504,7 @@ class _LotacaoScreenState extends State<LotacaoScreen>
 
                                         const SizedBox(height: 25),
 
-                                        // ==================================
                                         // TABELA POR FAIXA ETÁRIA
-                                        // ==================================
 
                                         SizedBox(
                                           width: 274,
@@ -500,9 +521,9 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                                             ),
                                             child: Column(
                                               children: [
-                                                // ============================
+                                                
                                                 // CABEÇALHO DA TABELA
-                                                // ============================
+                                                
 
                                                 Container(
                                                   height: 28,
@@ -557,11 +578,11 @@ class _LotacaoScreenState extends State<LotacaoScreen>
                                                   ),
                                                 ),
 
-                                                // ============================
+                                               
                                                 // FAIXAS ETÁRIAS
-                                                //
+                                                
                                                 // A ORDEM É A MESMA DO BANCO.
-                                                // ============================
+                                               
 
                                                 ...DatabaseHelper
                                                     .ordemFaixasEtarias
