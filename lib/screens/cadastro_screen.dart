@@ -126,21 +126,27 @@ class _CadastroScreenState extends State<CadastroScreen> {
     qualBeneficio = f.qualBeneficioAssistencia.isEmpty
         ? null
         : f.qualBeneficioAssistencia;
-    aposentadoPensionista =
-        f.aposentadoPensionista.isEmpty ? null : f.aposentadoPensionista;
+    aposentadoPensionista = f.aposentadoPensionista.isEmpty
+        ? null
+        : f.aposentadoPensionista;
     qualAposentado = f.qualAposentadoPensionista.isEmpty
         ? null
         : f.qualAposentadoPensionista;
-    possuiComorbidade =
-        f.possuiComorbidade.isEmpty ? null : f.possuiComorbidade;
-    usoMedicacaoContinuo =
-        f.usoMedicacaoContinuo.isEmpty ? null : f.usoMedicacaoContinuo;
-    possuiDeficiencia =
-        f.possuiDeficiencia.isEmpty ? null : f.possuiDeficiencia;
-    houvePerdasMateriais =
-        f.houvePerdasMateriais.isEmpty ? null : f.houvePerdasMateriais;
-    houvePerdaDocumentacao =
-        f.houvePerdaDocumentacao.isEmpty ? null : f.houvePerdaDocumentacao;
+    possuiComorbidade = f.possuiComorbidade.isEmpty
+        ? null
+        : f.possuiComorbidade;
+    usoMedicacaoContinuo = f.usoMedicacaoContinuo.isEmpty
+        ? null
+        : f.usoMedicacaoContinuo;
+    possuiDeficiencia = f.possuiDeficiencia.isEmpty
+        ? null
+        : f.possuiDeficiencia;
+    houvePerdasMateriais = f.houvePerdasMateriais.isEmpty
+        ? null
+        : f.houvePerdasMateriais;
+    houvePerdaDocumentacao = f.houvePerdaDocumentacao.isEmpty
+        ? null
+        : f.houvePerdaDocumentacao;
 
     if (f.quaisPerdasMateriais.trim().isNotEmpty) {
       perdasMateriaisSelecionadas.addAll(
@@ -195,8 +201,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
     });
 
     final dataFormatada = _formatarData(dataCadastro);
-    final nascimentoFormatado =
-        dataNascimento != null ? _formatarData(dataNascimento!) : '';
+    final nascimentoFormatado = dataNascimento != null
+        ? _formatarData(dataNascimento!)
+        : '';
 
     final familia = Familia(
       id: widget.familiaExistente?.id,
@@ -219,8 +226,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
       qualBeneficioAssistenciaOutro: qualBeneficioOutroController.text.trim(),
       aposentadoPensionista: aposentadoPensionista ?? '',
       qualAposentadoPensionista: qualAposentado ?? '',
-      qualAposentadoPensionistaOutro:
-          qualAposentadoOutroController.text.trim(),
+      qualAposentadoPensionistaOutro: qualAposentadoOutroController.text.trim(),
       possuiComorbidade: possuiComorbidade ?? '',
       qualComorbidade: qualComorbidadeController.text.trim(),
       usoMedicacaoContinuo: usoMedicacaoContinuo ?? '',
@@ -372,29 +378,34 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   children: [
                     TextField(
                       controller: nomeMembroController,
-                      decoration:
-                          const InputDecoration(labelText: 'Nome completo'),
+                      decoration: const InputDecoration(
+                        labelText: 'Nome completo',
+                      ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
                       value: parentesco,
-                      decoration:
-                          const InputDecoration(labelText: 'Parentesco'),
-                      items: const [
-                        'Marido',
-                        'Esposa',
-                        'Companheiro/a',
-                        'Filho/a',
-                        'Pai',
-                        'Mãe',
-                        'Avô/Avó',
-                        'Outro',
-                      ]
-                          .map((item) => DropdownMenuItem(
-                                value: item,
-                                child: Text(item),
-                              ))
-                          .toList(),
+                      decoration: const InputDecoration(
+                        labelText: 'Parentesco',
+                      ),
+                      items:
+                          const [
+                                'Marido',
+                                'Esposa',
+                                'Companheiro/a',
+                                'Filho/a',
+                                'Pai',
+                                'Mãe',
+                                'Avô/Avó',
+                                'Outro',
+                              ]
+                              .map(
+                                (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(item),
+                                ),
+                              )
+                              .toList(),
                       onChanged: (valor) {
                         setDialogState(() => parentesco = valor);
                       },
@@ -408,8 +419,9 @@ class _CadastroScreenState extends State<CadastroScreen> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: escolaridadeMembroController,
-                      decoration:
-                          const InputDecoration(labelText: 'Escolaridade'),
+                      decoration: const InputDecoration(
+                        labelText: 'Escolaridade',
+                      ),
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
@@ -417,18 +429,21 @@ class _CadastroScreenState extends State<CadastroScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Identidade de gênero',
                       ),
-                      items: const [
-                        'Feminino',
-                        'Masculino',
-                        'Mulher trans',
-                        'Homem trans',
-                        'Não-binário',
-                      ]
-                          .map((item) => DropdownMenuItem(
-                                value: item,
-                                child: Text(item),
-                              ))
-                          .toList(),
+                      items:
+                          const [
+                                'Feminino',
+                                'Masculino',
+                                'Mulher trans',
+                                'Homem trans',
+                                'Não-binário',
+                              ]
+                              .map(
+                                (item) => DropdownMenuItem(
+                                  value: item,
+                                  child: Text(item),
+                                ),
+                              )
+                              .toList(),
                       onChanged: (valor) {
                         setDialogState(() => identidadeGeneroMembro = valor);
                       },
@@ -452,7 +467,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                         parentesco: parentesco ?? '',
                         idade:
                             int.tryParse(idadeMembroController.text.trim()) ??
-                                0,
+                            0,
                         escolaridade: escolaridadeMembroController.text.trim(),
                         identidadeGenero: identidadeGeneroMembro ?? '',
                       ),
@@ -479,7 +494,6 @@ class _CadastroScreenState extends State<CadastroScreen> {
       membros.removeAt(index);
     });
   }
-
 
   Widget _cardPergunta(Widget child) {
     return Container(
@@ -577,10 +591,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
                   dense: true,
                   contentPadding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,
-                  title: Text(
-                    opcao,
-                    style: const TextStyle(fontSize: 12.5),
-                  ),
+                  title: Text(opcao, style: const TextStyle(fontSize: 12.5)),
                 ),
               );
             }).toList(),
@@ -676,8 +687,11 @@ class _CadastroScreenState extends State<CadastroScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today,
-                      size: 19, color: Colors.black87),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 19,
+                    color: Colors.black87,
+                  ),
                   const SizedBox(width: 10),
                   Text(
                     data != null ? _formatarData(data) : 'Selecionar data',
@@ -707,9 +721,7 @@ class _CadastroScreenState extends State<CadastroScreen> {
           foregroundColor: Colors.black,
           padding: EdgeInsets.zero,
           side: const BorderSide(color: Colors.black, width: 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(7),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
         ),
         child: carregando
             ? const SizedBox(
@@ -777,14 +789,22 @@ class _CadastroScreenState extends State<CadastroScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Parentesco: ${membro.parentesco}',
-                    style: const TextStyle(fontSize: 12.5)),
-                Text('Idade: ${membro.idade}',
-                    style: const TextStyle(fontSize: 12.5)),
-                Text('Escolaridade: ${membro.escolaridade}',
-                    style: const TextStyle(fontSize: 12.5)),
-                Text('Id. de Gênero: ${membro.identidadeGenero}',
-                    style: const TextStyle(fontSize: 12.5)),
+                Text(
+                  'Parentesco: ${membro.parentesco}',
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+                Text(
+                  'Idade: ${membro.idade}',
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+                Text(
+                  'Escolaridade: ${membro.escolaridade}',
+                  style: const TextStyle(fontSize: 12.5),
+                ),
+                Text(
+                  'Id. de Gênero: ${membro.identidadeGenero}',
+                  style: const TextStyle(fontSize: 12.5),
+                ),
               ],
             ),
           ),
@@ -804,7 +824,11 @@ class _CadastroScreenState extends State<CadastroScreen> {
           border: Border.all(color: Colors.black, width: 1),
           borderRadius: BorderRadius.circular(7),
           boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 2, offset: Offset(1, 2)),
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 2,
+              offset: Offset(1, 2),
+            ),
           ],
         ),
         alignment: Alignment.center,
@@ -1144,27 +1168,28 @@ class _CadastroScreenState extends State<CadastroScreen> {
                     const Center(child: CircularProgressIndicator()),
 
                   if (!carregandoDados)
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final paddingHorizontal =
-                          constraints.maxWidth < 400 ? 25.0 : 40.0;
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final paddingHorizontal = constraints.maxWidth < 400
+                            ? 25.0
+                            : 40.0;
 
-                      return Form(
-                        key: _formKey,
-                        child: ListView.builder(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.only(
-                            top: 29,
-                            left: paddingHorizontal,
-                            right: paddingHorizontal,
-                            bottom: 40,
+                        return Form(
+                          key: _formKey,
+                          child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            padding: EdgeInsets.only(
+                              top: 29,
+                              left: paddingHorizontal,
+                              right: paddingHorizontal,
+                              bottom: 40,
+                            ),
+                            itemCount: secoes.length,
+                            itemBuilder: (context, index) => secoes[index],
                           ),
-                          itemCount: secoes.length,
-                          itemBuilder: (context, index) => secoes[index],
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),

@@ -86,9 +86,9 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     super.dispose();
   }
 
-  // ============================================================
+
   // SALVAR FAMÍLIA
-  // ============================================================
+
 
   Future<void> salvarFamilia() async {
     if (!_formKey.currentState!.validate()) {
@@ -185,9 +185,9 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     }
   }
 
-  // ============================================================
+
   // DATA
-  // ============================================================
+
 
   String _formatarData(DateTime data) {
     return '${data.day.toString().padLeft(2, '0')}/'
@@ -210,9 +210,9 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     }
   }
 
-  // ============================================================
+
   // MEMBROS
-  // ============================================================
+
 
   Future<void> abrirDialogoMembro() async {
     final nomeMembroController = TextEditingController();
@@ -408,9 +408,9 @@ class _FamiliaScreenState extends State<FamiliaScreen> {
     });
   }
 
-  // ============================================================
+
   // COMPONENTES
-  // ============================================================
+
 
   Widget _cardPergunta(Widget child) {
     return Container(

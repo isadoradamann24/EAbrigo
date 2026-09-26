@@ -51,8 +51,9 @@ class _CadastroAbrigoScreenState extends State<CadastroAbrigoScreen> {
       carregando = true;
     });
 
-    final lista = await DatabaseHelper.instance
-        .buscarBairrosComLotacao(widget.cidade.id!);
+    final lista = await DatabaseHelper.instance.buscarBairrosComLotacao(
+      widget.cidade.id!,
+    );
 
     if (!mounted) return;
 
@@ -123,8 +124,10 @@ class _CadastroAbrigoScreenState extends State<CadastroAbrigoScreen> {
         decoration: InputDecoration(
           labelText: label,
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 16,
+          ),
         ),
       ),
     );

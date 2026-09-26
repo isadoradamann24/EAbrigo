@@ -27,9 +27,9 @@ class _FamiliaDetalhesScreenState
 
   late Familia familia;
 
-  // ============================================================
+
   // CONTROLLERS
-  // ============================================================
+
 
   final nomeController = TextEditingController();
   final enderecoController = TextEditingController();
@@ -57,9 +57,9 @@ class _FamiliaDetalhesScreenState
 
   final obsController = TextEditingController();
 
-  // ============================================================
+
   // DADOS
-  // ============================================================
+
 
   DateTime? dataNascimento;
   DateTime dataCadastro = DateTime.now();
@@ -93,9 +93,9 @@ class _FamiliaDetalhesScreenState
 
   final List<MembroFamilia> membros = [];
 
-  // ============================================================
+
   // INIT
-  // ============================================================
+
 
   @override
   void initState() {
@@ -107,9 +107,9 @@ class _FamiliaDetalhesScreenState
     _carregarMembros();
   }
 
-  // ============================================================
+
   // PREENCHER FORMULÁRIO
-  // ============================================================
+
 
   void _preencherFormulario() {
     nomeController.text = familia.responsavel;
@@ -254,9 +254,9 @@ class _FamiliaDetalhesScreenState
         '${data.year}';
   }
 
-  // ============================================================
+
   // MEMBROS
-  // ============================================================
+
 
   Future<void> _carregarMembros() async {
     if (familia.id == null) {
@@ -504,9 +504,9 @@ class _FamiliaDetalhesScreenState
     });
   }
 
-  // ============================================================
+
   // EDITAR
-  // ============================================================
+
 
   void iniciarEdicao() {
     setState(() {
@@ -514,9 +514,9 @@ class _FamiliaDetalhesScreenState
     });
   }
 
-  // ============================================================
+
   // CANCELAR
-  // ============================================================
+
 
   Future<void> cancelarEdicao() async {
     _preencherFormulario();
@@ -529,9 +529,9 @@ class _FamiliaDetalhesScreenState
     await _carregarMembros();
   }
 
-  // ============================================================
+
   // SALVAR ALTERAÇÕES
-  // ============================================================
+
 
   Future<void> salvarAlteracoes() async {
     if (!_formKey.currentState!.validate()) {
@@ -658,9 +658,9 @@ class _FamiliaDetalhesScreenState
     }
   }
 
-  // ============================================================
+
   // EXCLUIR
-  // ============================================================
+
 
   Future<void> excluirFamilia() async {
     final confirmar =
@@ -759,9 +759,9 @@ class _FamiliaDetalhesScreenState
     }
   }
 
-  // ============================================================
+
   // DATA
-  // ============================================================
+
 
   Future<void> selecionarDataNascimento() async {
     if (!editando) return;
@@ -785,9 +785,9 @@ class _FamiliaDetalhesScreenState
     }
   }
 
-  // ============================================================
+
   // COMPONENTES - MESMO DESIGN DO FAMILIA_SCREEN
-  // ============================================================
+
 
   Widget _cardPergunta(Widget child) {
     return Container(
@@ -1122,9 +1122,9 @@ class _FamiliaDetalhesScreenState
     );
   }
 
-  // ============================================================
+
   // CARD DOS MEMBROS - MESMO MODELO
-  // ============================================================
+
 
   Widget _cardMembro(int index) {
     final membro =
@@ -1255,13 +1255,8 @@ class _FamiliaDetalhesScreenState
     );
   }
 
-  // ============================================================
+
   // BOTÃO
-  //
-  // "width" é opcional (default = ocupa a largura toda). Passar
-  // um valor menor deixa o botão específico mais compacto sem
-  // afetar os outros que usam este mesmo componente.
-  // ============================================================
 
   Widget _botao({
     required String texto,
@@ -1323,16 +1318,16 @@ class _FamiliaDetalhesScreenState
     );
   }
 
-  // ============================================================
+
   // BUILD
-  // ============================================================
+
 
   @override
   Widget build(BuildContext context) {
     final secoes = <Widget>[
-      // ==========================================================
+
       // BAIRRO
-      // ==========================================================
+
 
       Container(
         width: double.infinity,
@@ -1377,9 +1372,9 @@ class _FamiliaDetalhesScreenState
         height: 18,
       ),
 
-      // ==========================================================
+
       // TÍTULO
-      // ==========================================================
+
 
       Text(
         editando
@@ -1401,9 +1396,9 @@ class _FamiliaDetalhesScreenState
         height: 14,
       ),
 
-      // ==========================================================
+
       // IDENTIFICAÇÃO
-      // ==========================================================
+
 
       const Text(
         'Identificação pessoal da referência familiar e da família',
@@ -1530,9 +1525,9 @@ class _FamiliaDetalhesScreenState
         height: 18,
       ),
 
-      // ==========================================================
+
       // PERFIL SOCIOECONÔMICO
-      // ==========================================================
+
 
       _tituloSecao(
         'Perfil socioeconômico',
@@ -1882,9 +1877,9 @@ class _FamiliaDetalhesScreenState
         height: 8,
       ),
 
-      // ==========================================================
+
       // COMPOSIÇÃO FAMILIAR
-      // ==========================================================
+
 
       _tituloSecao(
         'Composição Familiar',
@@ -1954,9 +1949,9 @@ class _FamiliaDetalhesScreenState
         height: 18,
       ),
 
-      // ==========================================================
+
       // OBS
-      // ==========================================================
+
 
       _tituloSecao('OBS'),
 
@@ -1973,13 +1968,13 @@ class _FamiliaDetalhesScreenState
         height: 22,
       ),
 
-      // ==========================================================
+
       // BOTÕES
       //
       // O botão "Excluir" agora usa uma largura menor (180) e fica
       // centralizado, diferente dos outros botões desta tela, que
       // continuam ocupando a largura toda.
-      // ==========================================================
+
 
       if (!editando) ...[
         _botao(
@@ -2047,9 +2042,9 @@ class _FamiliaDetalhesScreenState
       ),
     ];
 
-    // ============================================================
+  
     // TELA
-    // ============================================================
+  
 
     return Scaffold(
       backgroundColor:
@@ -2121,9 +2116,9 @@ class _FamiliaDetalhesScreenState
     );
   }
 
-  // ============================================================
+
   // DISPOSE
-  // ============================================================
+
 
   @override
   void dispose() {

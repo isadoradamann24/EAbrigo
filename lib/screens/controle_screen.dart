@@ -68,9 +68,9 @@ class _ControleScreenState
     super.dispose();
   }
 
-  // ============================================================
+
   // CARREGAR FAMÍLIAS
-  // ============================================================
+
 
   Future<void> carregarFamilias() async {
     if (bairroSelecionado == null) {
@@ -123,9 +123,9 @@ class _ControleScreenState
     }
   }
 
-  // ============================================================
+
   // PESQUISA
-  // ============================================================
+
 
   void pesquisarFamilias() {
     final texto =
@@ -148,9 +148,9 @@ class _ControleScreenState
     });
   }
 
-  // ============================================================
+
   // ABRIR FAMÍLIA
-  // ============================================================
+
 
   Future<void> abrirFamilia(
     Familia familia,
@@ -170,9 +170,9 @@ class _ControleScreenState
     await carregarFamilias();
   }
 
-  // ============================================================
+
   // NOVA FAMÍLIA
-  // ============================================================
+
 
   Future<void> novaFamilia() async {
     if (bairroSelecionado == null) {
@@ -205,9 +205,9 @@ class _ControleScreenState
     }
   }
 
-  // ============================================================
+
   // BOTÃO
-  // ============================================================
+
 
   Widget _botao({
     required String texto,
@@ -244,9 +244,9 @@ class _ControleScreenState
     );
   }
 
-  // ============================================================
+
   // CARD DA FAMÍLIA
-  // ============================================================
+
 
   Widget _cardFamilia(
     Familia familia,

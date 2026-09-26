@@ -49,9 +49,9 @@ class _BairroScreenState extends State<BairroScreen> {
     super.dispose();
   }
 
-  // ============================================================
+ 
   // CARREGAR FAMÍLIAS
-  // ============================================================
+ 
 
   Future<void> carregarFamilias() async {
     if (mounted) {
@@ -93,9 +93,9 @@ class _BairroScreenState extends State<BairroScreen> {
     }
   }
 
-  // ============================================================
+ 
   // PESQUISAR FAMÍLIA
-  // ============================================================
+ 
 
   void pesquisarFamilias() {
     final texto = pesquisaController.text.trim().toLowerCase();
@@ -116,9 +116,9 @@ class _BairroScreenState extends State<BairroScreen> {
     });
   }
 
-  // ============================================================
+ 
   // NOVO CADASTRO
-  // ============================================================
+ 
 
   Future<void> abrirCadastroFamilia() async {
     await Navigator.push(
@@ -137,9 +137,9 @@ class _BairroScreenState extends State<BairroScreen> {
     await carregarFamilias();
   }
 
-  // ============================================================
+ 
   // DETALHES DA FAMÍLIA
-  // ============================================================
+ 
 
   Future<void> abrirDetalhesFamilia(Familia familia) async {
     await Navigator.push(
@@ -157,9 +157,9 @@ class _BairroScreenState extends State<BairroScreen> {
     await carregarFamilias();
   }
 
-  // ============================================================
+ 
   // CARD DA FAMÍLIA
-  // ============================================================
+ 
 
   Widget _cardFamilia(Familia familia) {
     return Padding(
@@ -190,9 +190,9 @@ class _BairroScreenState extends State<BairroScreen> {
     );
   }
 
-  // ============================================================
+ 
   // BOTÕES
-  // ============================================================
+ 
 
   Widget _botao({
     required String texto,

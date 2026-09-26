@@ -48,16 +48,9 @@ class _CidadesScreenState extends State<CidadesScreen> {
     );
   }
 
-  // ==================================================
+
   // BOTÃO DE CADA CIDADE
-  //
-  // Continua um embaixo do outro tanto no celular
-  // quanto no tablet.
-  //
-  // No celular: mantém 270px.
-  // No tablet: aumenta proporcionalmente, mas possui
-  // um limite máximo para não ficar exageradamente largo.
-  // ==================================================
+ 
   Widget _botaoCidade(Cidade cidade) {
     final larguraTela = MediaQuery.of(context).size.width;
 
@@ -110,14 +103,14 @@ class _CidadesScreenState extends State<CidadesScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ==================================================
+          
             // CABEÇALHO (logo + menu + login)
-            // ==================================================
+          
             const Cabecalho(),
 
-            // ==================================================
+          
             // ÁREA PRINCIPAL
-            // ==================================================
+          
             Expanded(
               child: Stack(
                 children: [
