@@ -169,15 +169,15 @@ class _EspecificidadesScreenState
       body: SafeArea(
         child: Column(
           children: [
-            // ====================================================
+          
             // CABEÇALHO
-            // ====================================================
+          
 
             const Cabecalho(),
 
-            // ====================================================
+          
             // TÍTULO DA TELA + VOLTAR
-            // ====================================================
+          
 
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -209,9 +209,9 @@ class _EspecificidadesScreenState
               ),
             ),
 
-            // ====================================================
+          
             // CONTEÚDO
-            // ====================================================
+          
 
             Expanded(
               child: carregando
